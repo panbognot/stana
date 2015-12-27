@@ -2,7 +2,7 @@
 	require_once('codesword_adx.php');
 
 	// returns Average Directional Index Data (timestamp, ADX)
-	function getADX ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
+	function getBollinger ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
 		// Create connection
 		$con=mysqli_connect($host, $user, $pass, $db);
 		

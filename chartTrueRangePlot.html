@@ -15,7 +15,7 @@ var testData, testData2;
 
 function plotStock () {
     //$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=aapl-c.json&callback=?', function (data) {
-    $.getJSON('http://localhost/analyzer/getData.php?company=smc&timerange=3y&chart=atr&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=atr&dataorg=highchart', function (data) {
     	testData = data;
 
         // Create the chart

@@ -14,7 +14,7 @@
 var testData, testData2;
 
 function plotStock() {
-    $.getJSON('http://localhost/analyzer/getData.php?company=smc&timerange=3y&chart=stoch&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=stoch&dataorg=highchart', function (data) {
         testData = data;
 
         // split the data set into %K, %D
