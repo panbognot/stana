@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>ADX Plot</title>
+	<title>Bollinger Bands Plot</title>
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
 	<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 
 </head>
@@ -15,56 +16,68 @@ var testData, testData2;
 
 function plotStock () {
     //$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=aapl-c.json&callback=?', function (data) {
-    $.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=adx&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=bollinger&dataorg=highchart', function (data) {
     	testData = data;
+
+        // split the data set into sma, bollinger upper band, bollinger lower band
+        var sma = [],
+            bollingerBands = [],
+            dataLength = data.length,
+            // set the allowed units for data grouping
+            groupingUnits = [[
+                'week',                         // unit name
+                [1]                             // allowed multiples
+            ], [
+                'month',
+                [1, 2, 3, 4, 6]
+            ]],
+
+            i = 0;
+
+        for (i; i < dataLength; i += 1) {
+            sma.push([
+                data[i][0], // the date
+                data[i][1], // sma
+            ]);
+
+            bollingerBands.push([
+                data[i][0], // the date
+                data[i][2], // the upper band
+                data[i][3], // the lower band
+            ]);
+        }
 
         // Create the chart
         $('#container').highcharts('StockChart', {
             rangeSelector : {
-                selected : 1
+                selected : 2
             },
 
             title : {
-                text : 'ADX Plot'
+                text : 'Bollinger Bands Plot'
             },
 
-            yAxis : {
-                title: {
-                    text: 'ADX Plot'
+            yAxis : [{
+                labels: {
+                    align: 'right',
+                    x: -3
                 },
-                plotLines: [{
-                    value: 20,
-                    color: 'yellow',
-                    dashStyle: 'shortdash',
-                    width: 3,
-                    label: {
-                        text: 'Non-trend'
-                    }
-                }, {
-                    value: 50,
-                    color: 'orange',
-                    dashStyle: 'shortdash',
-                    width: 3,
-                    label: {
-                        text: 'Strong Trend'
-                    }
-                }, {
-                    value: 75,
-                    color: 'red',
-                    dashStyle: 'shortdash',
-                    width: 3,
-                    label: {
-                        text: 'Very Strong Trend'
-                    }
-                }]
-            },
+                title: {
+                    text: 'Price'
+                },
+                lineWidth: 2
+            }],
 
             series : [{
-                name : 'ADX Plot',
-                data : data,
-                tooltip: {
-                    valueDecimals: 2
-                }
+                name: 'SMA',
+                data: sma,
+                color: 'black'
+            }, 
+            {
+                type: 'areasplinerange',
+                name: 'Bollinger Bands',
+                data: bollingerBands,
+                color: 'turquoise'
             }]
         });
     });

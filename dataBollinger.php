@@ -1,5 +1,5 @@
 <?php 
-	require_once('codesword_adx.php');
+	require_once('codesword_bollinger.php');
 
 	// returns Bollinger Bands Data (timestamp, upper bollinger band, lower bollinger band)
 	function getBollingerBands ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
@@ -13,16 +13,16 @@
 		}
 
 		$studyPeriod = 20;
-		$offsetPeriod = $studyPeriod * 2;
+		$offsetPeriod = $studyPeriod * 1;
 		if ($dataorg == "highchart") {
 			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT (+8:00)
 			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, 
-					high, low, close
+					close
 					FROM $company 
 					WHERE timestamp >= DATE_ADD('".$from."', INTERVAL -$offsetPeriod DAY) 
 					AND timestamp <= '".$to."' ORDER BY timestamp ASC";
 		} else {
-			$sql = "SELECT DATE_FORMAT(timestamp, '%Y-%m-%d') as timestamp, high, low, close 
+			$sql = "SELECT DATE_FORMAT(timestamp, '%Y-%m-%d') as timestamp, close 
 					FROM $company 
 					WHERE timestamp >= DATE_ADD('".$from."', INTERVAL -$offsetPeriod DAY) 
 					AND timestamp <= '".$to."' ORDER BY timestamp ASC";
@@ -33,47 +33,41 @@
 		$dbreturn = "";
 		$ctr = 0;
 		$temp;
-		$returnADX;
+		$returnBB;
 		while($row = mysqli_fetch_array($result)) {
 			if ($dataorg == "json") {
 			  	$dbreturn[$ctr][0] = $row['timestamp'];
-				$dbreturn[$ctr][1] = floatval($row['high']);
-				$dbreturn[$ctr][2] = floatval($row['low']);
-				$dbreturn[$ctr][3] = floatval($row['close']);
+				$dbreturn[$ctr][1] = floatval($row['close']);
 			} 
 			elseif ($dataorg == "highchart") {
 			  	$dbreturn[$ctr][0] = doubleval($row['timestamp']);
-				$dbreturn[$ctr][1] = floatval($row['high']);
-				$dbreturn[$ctr][2] = floatval($row['low']);
-				$dbreturn[$ctr][3] = floatval($row['close']);
+				$dbreturn[$ctr][1] = floatval($row['close']);
 			}
 			elseif ($dataorg == "array") {
 				//TODO: create code for organizing an array data output
 			}
 			else {
 				$dbreturn[$ctr][0] = $row['timestamp'];
-				$dbreturn[$ctr][1] = floatval($row['high']);
-				$dbreturn[$ctr][2] = floatval($row['low']);
-				$dbreturn[$ctr][3] = floatval($row['close']);
+				$dbreturn[$ctr][1] = floatval($row['close']);
 			}
 
 			$ctr = $ctr + 1;
 		}
 
 		if ($dataorg == "json") {
-			$returnADX = codesword_adx($dbreturn, $studyPeriod);
+			$returnBB = codesword_bollinger_bands($dbreturn, $studyPeriod);
 		} 
 		elseif ($dataorg == "highchart") {
-			$returnADX = codesword_adx($dbreturn, $studyPeriod);
+			$returnBB = codesword_bollinger_bands($dbreturn, $studyPeriod);
 		}
 		elseif ($dataorg == "array") {
 		//TODO: create code for organizing an array data output
 		}
 		else { //json
-			$returnADX = codesword_adx($dbreturn, $studyPeriod);
+			$returnBB = codesword_bollinger_bands($dbreturn, $studyPeriod);
 		}
 
-		echo json_encode($returnADX);
+		echo json_encode($returnBB);
 		mysqli_close($con);
 	}
 ?>
