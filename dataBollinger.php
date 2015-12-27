@@ -1,8 +1,8 @@
 <?php 
 	require_once('codesword_adx.php');
 
-	// returns Average Directional Index Data (timestamp, ADX)
-	function getBollinger ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
+	// returns Bollinger Bands Data (timestamp, upper bollinger band, lower bollinger band)
+	function getBollingerBands ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
 		// Create connection
 		$con=mysqli_connect($host, $user, $pass, $db);
 		
@@ -12,7 +12,7 @@
 		  return;
 		}
 
-		$studyPeriod = 14;
+		$studyPeriod = 20;
 		$offsetPeriod = $studyPeriod * 2;
 		if ($dataorg == "highchart") {
 			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT (+8:00)

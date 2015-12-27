@@ -52,7 +52,6 @@
 	// Returns - data with structure [timestamp, +DM14, -DM14]
 	function codesword_dm_wema($real, $periodLookback=14) {
 		$dm = codesword_dm($real);
-		//return $dm;
 
 		//Use Wilder's EMA on the resultant Directional Movement
 		$dmNDays = codesword_wilder_ema2($dm, $periodLookback);
@@ -71,11 +70,9 @@
 	function codesword_dx($real, $periodLookback=14) {
 		//compute the True Range Undivided Average for $periodLookback days
 		$TR14 = codesword_utr($real, $periodLookback);
-		//return $TR14;
 
 		//compute the Directional Movement for $periodLookback days
 		$DM14 = codesword_dm_wema($real, $periodLookback);
-		//return $DM14;
 
 		//compute the Directional Indicators and the Directional Index
 		$DI14 = [];
@@ -101,11 +98,7 @@
 			$DX[$i][0] = $DM14[$i][0];
 			$DX[$i][1] = ($DI14_diff[$i] / $DI14_sum[$i]) * 100;
 		}
-		//return $DI14;
 		return $DX;
-
-		//$ADX = codesword_wilder_ema($DX, $periodLookback);
-		//return $ADX;
 	}
 
 	// This is a momentum indicator that uses support and resistance levels
