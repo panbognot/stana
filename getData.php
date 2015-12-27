@@ -219,6 +219,10 @@
 				getBollingerBands($company, $fromDate, $toDate, $dataorg, 
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				break;
+			case 'bbw':
+				getBBW($company, $fromDate, $toDate, $dataorg, 
+					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+				break;
 			default:
 				echo "Chart Type Does Not Exist Yet!!!";
 				break;
