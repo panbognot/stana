@@ -209,7 +209,17 @@ function plotStock (quote) {
         if ($('#'+chartName).is(':checked')) {
             switch(chartIndicatorType){
                 case 'price':
-                    chartPricePresent += 1;
+                    if( (chartName == 'sma5') ||
+                        (chartName == 'sma15') ||
+                        (chartName == 'sma20') ||
+                        (chartName == 'sma50') ||
+                        (chartName == 'sma120') ||
+                        (chartName == 'sma150') 
+                        ) {
+                        chartPricePresent += 2;
+                    }else{
+                        chartPricePresent += 1;
+                    }
                     break;
                 case 'volume':
                     chartVolumePresent += 1;
@@ -302,32 +312,32 @@ function plotStock (quote) {
                 case 'sma5':
                     getSMAOnly (stockQuote, ctr, 5);
                     typeCharts[i].pos = ctr;
-                    ctr += 1;
+                    ctr += 2;
                     break;
                 case 'sma15':
                     getSMAOnly (stockQuote, ctr, 15);
                     typeCharts[i].pos = ctr;
-                    ctr += 1;
+                    ctr += 2;
                     break;
                 case 'sma20':
                     getSMAOnly (stockQuote, ctr, 20);
                     typeCharts[i].pos = ctr;
-                    ctr += 1;
+                    ctr += 2;
                     break;
                 case 'sma50':
                     getSMAOnly (stockQuote, ctr, 50);
                     typeCharts[i].pos = ctr;
-                    ctr += 1;
+                    ctr += 2;
                     break;
                 case 'sma120':
                     getSMAOnly (stockQuote, ctr, 120);
                     typeCharts[i].pos = ctr;
-                    ctr += 1;
+                    ctr += 2;
                     break;
                 case 'sma150':
                     getSMAOnly (stockQuote, ctr, 150);
                     typeCharts[i].pos = ctr;
-                    ctr += 1;
+                    ctr += 2;
                     break;
                 case 'stochastic':
                     getStochasticOnly (stockQuote, ctr);
@@ -512,43 +522,6 @@ function createYAxes () {
 // Create Chart
 function createChart (quote) {
     createYAxes();
-
-    //Test code for setting up flags
-    seriesOptions[seriesCounter] = {
-            type : 'flags',
-            data : [{
-                x: Date.UTC(2015, 9, 22),
-                title: 'Buy',
-                text: 'Shape: "squarepin"',
-                fillColor: 'yellowgreen'
-            }, {
-                x: Date.UTC(2015, 11, 28),
-                title: 'Buy',
-                text: 'Shape: "squarepin"',
-                fillColor: 'yellowgreen',
-            }, {
-                x: Date.UTC(2015, 11, 5),
-                title: 'Sell',
-                text: 'Shape: "squarepin"',
-                fillColor: 'red',
-            }, {
-                x: Date.UTC(2015, 10, 11),
-                title: 'Sell',
-                text: 'Shape: "squarepin"',
-                fillColor: 'red',
-            }],
-            onSeries: 'closeprices',
-            shape: 'squarepin',
-            width: 16,
-            style: { // text style
-                color: 'white'
-            },
-            states: {
-                hover: {
-                    fillColor: '#yellowgreen' // darker
-                }
-            }
-        };
 
     $('#container').highcharts('StockChart', {
         rangeSelector : {
@@ -786,25 +759,68 @@ function getRSIOnly (quote, seriesNum) {
     });
 }
 
-// Get the SMA for the selected stock
+var testBuySellSignal = [];
+// Get the SMA for the selected stock COPY for experimentation
 function getSMAOnly (quote, seriesNum, period) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=sma&period='+period+'&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=smabuysellsignal&period='+period+'&dataorg=highchart', function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
         //return data;
+        var sma = data[0];
+
+        // split the data set into macd, signal and divergence
+        var signals = [],
+            temp = data[1],
+            dataLength = temp.length,
+            i = 0;
+
+        var tempTS, tempTitle, tempFillColor;
+
+        for (i=0; i < dataLength; i += 1) {
+            tempTS = temp[i][0];
+            tempTitle = temp[i][1];
+
+            if (tempTitle == "buy") {
+                tempFillColor = "yellowgreen";
+            }
+            else if(tempTitle == "sell"){
+                tempFillColor = "red";
+            }
+
+            signals[i] = {x: tempTS, title: tempTitle, fillColor: tempFillColor};
+        }
+
+        testBuySellSignal = signals;
 
         seriesOptions[seriesNum] = {
                 name : 'SMA ' + period,
-                data : data,
+                id : 'smabuysellsignal',
+                data : sma,
                 yAxis: yAxisPositions.price,
                 tooltip: {
                     valueDecimals: 2
                 }
             };
 
-        seriesCounter += 1;
+        seriesOptions[seriesNum + 1] = {
+                type : 'flags',
+                data : signals,
+                onSeries: 'smabuysellsignal',
+                shape: 'squarepin',
+                width: 16,
+                style: { // text style
+                    color: 'white'
+                },
+                states: {
+                    hover: {
+                        fillColor: '#yellowgreen' // darker
+                    }
+                }
+            };
+
+        seriesCounter += 2;
 
         if(seriesCounter === chartTotalToPlot){
             createChart(quote);
