@@ -513,6 +513,43 @@ function createYAxes () {
 function createChart (quote) {
     createYAxes();
 
+    //Test code for setting up flags
+    seriesOptions[seriesCounter] = {
+            type : 'flags',
+            data : [{
+                x: Date.UTC(2015, 9, 22),
+                title: 'Buy',
+                text: 'Shape: "squarepin"',
+                fillColor: 'yellowgreen'
+            }, {
+                x: Date.UTC(2015, 11, 28),
+                title: 'Buy',
+                text: 'Shape: "squarepin"',
+                fillColor: 'yellowgreen',
+            }, {
+                x: Date.UTC(2015, 11, 5),
+                title: 'Sell',
+                text: 'Shape: "squarepin"',
+                fillColor: 'red',
+            }, {
+                x: Date.UTC(2015, 10, 11),
+                title: 'Sell',
+                text: 'Shape: "squarepin"',
+                fillColor: 'red',
+            }],
+            onSeries: 'closeprices',
+            shape: 'squarepin',
+            width: 16,
+            style: { // text style
+                color: 'white'
+            },
+            states: {
+                hover: {
+                    fillColor: '#yellowgreen' // darker
+                }
+            }
+        };
+
     $('#container').highcharts('StockChart', {
         rangeSelector : {
             selected : 1
@@ -532,7 +569,7 @@ function createChart (quote) {
 // Get the Close Prices for the selected stock
 function getClosePricesOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=3y&chart=close&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=close&dataorg=highchart', function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -541,6 +578,7 @@ function getClosePricesOnly (quote, seriesNum) {
         seriesOptions[seriesNum] = {
                 name : quote + ' Price',
                 data : data,
+                id : 'closeprices',
                 yAxis: yAxisPositions.price,
                 tooltip: {
                     valueDecimals: 2
@@ -558,7 +596,7 @@ function getClosePricesOnly (quote, seriesNum) {
 // Get the Candlestick Prices for the selected stock
 function getCandlestickOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=3y&chart=ohlc&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=ohlc&dataorg=highchart', function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -608,7 +646,7 @@ function getCandlestickOnly (quote, seriesNum) {
 // Get the MACD for the selected stock
 function getMACDOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=3y&chart=macd&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=macd&dataorg=highchart', function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -675,7 +713,7 @@ function getMACDOnly (quote, seriesNum) {
 // Get the On Balance Volume for the selected stock
 function getOBVOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=3y&chart=obv&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=obv&dataorg=highchart', function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -713,7 +751,7 @@ function getOBVOnly (quote, seriesNum) {
 // Get the Relative Strength Index for the selected stock
 function getRSIOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=3y&chart=rsi&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=rsi&dataorg=highchart', function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -751,7 +789,7 @@ function getRSIOnly (quote, seriesNum) {
 // Get the SMA for the selected stock
 function getSMAOnly (quote, seriesNum, period) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=3y&chart=sma&period='+period+'&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=sma&period='+period+'&dataorg=highchart', function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -777,7 +815,7 @@ function getSMAOnly (quote, seriesNum, period) {
 // Get the Stochastic Plot for the selected stock
 function getStochasticOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=3y&chart=stoch&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=stoch&dataorg=highchart', function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -838,7 +876,7 @@ function getStochasticOnly (quote, seriesNum) {
 // Get Volume for the selected stock
 function getVolumeOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=3y&chart=volume&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=volume&dataorg=highchart', function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
