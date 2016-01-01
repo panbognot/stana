@@ -51,9 +51,7 @@
 		}
 
 		if ($dataorg == "json") {
-			//echo json_encode($dbreturn);
 			$sma = codesword_sma($dbreturn, $samplePeriod);
-			//echo json_encode($ema);
 		} 
 		elseif ($dataorg == "highchart") {
 			$sma = codesword_sma($dbreturn, $samplePeriod);
@@ -65,7 +63,13 @@
 			$sma = codesword_sma($dbreturn, $samplePeriod);
 		}
 
-		echo json_encode($sma);
+		$buysellSignals = codesword_smaBuySellSignal($dbreturn, $sma);
+
+		$allData = [];
+		$allData[0] = $sma;
+		$allData[1] = $buysellSignals;
+
+		echo json_encode($allData);
 		mysqli_close($con);
 	}
 
@@ -119,9 +123,7 @@
 		}
 
 		if ($dataorg == "json") {
-			//echo json_encode($dbreturn);
 			$sma = codesword_sma($dbreturn, $samplePeriod);
-			//echo json_encode($ema);
 		} 
 		elseif ($dataorg == "highchart") {
 			$sma = codesword_sma($dbreturn, $samplePeriod);

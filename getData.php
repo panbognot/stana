@@ -199,16 +199,6 @@
 					echo "Error: No period selected";
 				}
 				break;
-			case 'smabuysellsignal':
-				if(isset($_GET['period'])) {
-					$period = $_GET['period'];
-					getSMAbuysellSignal($company, $fromDate, $toDate, $dataorg, $period, 
-						$mysql_host, $mysql_database, $mysql_user, $mysql_password);
-				}
-				else {
-					echo "Error: No period selected";
-				}
-				break;
 			case 'tr':
 				getTrueRange($company, $fromDate, $toDate, $dataorg, 
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);

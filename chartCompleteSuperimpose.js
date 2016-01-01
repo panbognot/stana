@@ -763,7 +763,7 @@ var testBuySellSignal = [];
 // Get the SMA for the selected stock COPY for experimentation
 function getSMAOnly (quote, seriesNum, period) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=smabuysellsignal&period='+period+'&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=sma&period='+period+'&dataorg=highchart', function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -792,8 +792,6 @@ function getSMAOnly (quote, seriesNum, period) {
             signals[i] = {x: tempTS, title: tempTitle, fillColor: tempFillColor};
         }
 
-        testBuySellSignal = signals;
-
         seriesOptions[seriesNum] = {
                 name : 'SMA ' + period,
                 id : 'smabuysellsignal',
@@ -803,6 +801,8 @@ function getSMAOnly (quote, seriesNum, period) {
                     valueDecimals: 2
                 }
             };
+
+        seriesCounter += 1;
 
         seriesOptions[seriesNum + 1] = {
                 type : 'flags',
@@ -820,7 +820,7 @@ function getSMAOnly (quote, seriesNum, period) {
                 }
             };
 
-        seriesCounter += 2;
+        seriesCounter += 1;
 
         if(seriesCounter === chartTotalToPlot){
             createChart(quote);
