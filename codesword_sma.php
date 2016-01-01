@@ -65,20 +65,56 @@
 			//Split the comparison by trend
 			//Uptrend 
 			if ($curPrice > $curSma) {
-				//there is a buy signal if there was a cross over of values
+				//there is a possible buy signal if there was a cross over of values
 				if ($prevPrice <= $prevSma) {
-					$signals[$ctr][0] = $sma[$i][0];
-					$signals[$ctr][1] = "buy";
-					$ctr++;
+					//generate buy signal only if the slope of the SMA is positive
+					$slopeSma = ($curSma - $prevSma) / (2 * $curSma);
+
+					//slope must be greater than 0.1% of the current SMA value
+					//0.1% is just a rule of thumb and can still be subject to change
+					if ($slopeSma > 0) {
+						$signals[$ctr][0] = $sma[$i][0];
+						$signals[$ctr][1] = "buy";
+						$ctr++;
+					}
+				}
+
+				//Do this step only if there are at least 3 sma values to compare
+				if ($i > 2) {
+					//check if slope of sma for the past 3 days is progressively positive
+					if ( ($curSma > $prevSma) && ($prevSma > $sma[$i-2][1]) ) {
+						//create a buy signal only if the last signal is "sell"
+						if ($ctr > 0) {
+							if ($signals[$ctr-1][1] == "sell") {
+								$signals[$ctr][0] = $sma[$i][0];
+								$signals[$ctr][1] = "buy";
+								$ctr++;
+							}
+						}
+					}
 				}
 			}
 			//Downtrend
 			elseif ($curPrice < $curSma) {
 				//there is a sell signal if there was a cross over of values
 				if ($prevPrice >= $prevSma) {
-					$signals[$ctr][0] = $sma[$i][0];
-					$signals[$ctr][1] = "sell";
-					$ctr++;
+					//only applicable to entries greater than the first entry
+					if ($ctr > 0) {
+						//generate a sell signal only if last one was a buy signal
+						if ($signals[$ctr-1][1] == "buy") {
+							//check if |curPrice/prevPrice - 1| > 1%
+							if ( (($prevPrice/$curPrice) - 1) > 0.01 ) {
+								$signals[$ctr][0] = $sma[$i][0];
+								$signals[$ctr][1] = "sell";
+								$ctr++;
+							}
+						}
+					}
+					else {
+						$signals[$ctr][0] = $sma[$i][0];
+						$signals[$ctr][1] = "sell";
+						$ctr++;
+					}
 				}
 			}
 			//Sideways
