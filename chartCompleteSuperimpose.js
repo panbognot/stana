@@ -27,6 +27,11 @@ function generateCheckboxes(){
             plotStock(stockQuote);
         });
     });
+
+    //When check box for showing buy/sell signals is changed
+    $('#enBuySellSignals').change(function() {
+        plotStock(stockQuote);
+    });
 }
 
 generateCheckboxes();
@@ -178,6 +183,7 @@ function calculateChartHeights (pricePres, volPres, momPres, oscPres) {
     //return nTypeOfChartsToPlot;
 }
 
+var showBuySellSignals = false;
 function plotStock (quote) {
     stockQuote = quote;
     seriesOptions = [];
@@ -199,6 +205,9 @@ function plotStock (quote) {
         return;
     };
 
+    // Determine if we should showing of buy/sell signals has been enabled
+    showBuySellSignals = $('#enBuySellSignals').is(':checked');
+
     // Get the number of charts to plot first
     // the reason why its separated is due to the nature of the
     // plots being asynchronous
@@ -216,8 +225,14 @@ function plotStock (quote) {
                         (chartName == 'sma120') ||
                         (chartName == 'sma150') 
                         ) {
-                        chartPricePresent += 2;
-                    }else{
+                        if (showBuySellSignals) {
+                            chartPricePresent += 2;
+                        }
+                        else{
+                            chartPricePresent += 1;
+                        }
+                    }
+                    else{
                         chartPricePresent += 1;
                     }
                     break;
@@ -226,27 +241,31 @@ function plotStock (quote) {
 
                     if(chartName == 'obv'){
                         indicatorOBVPresent = 1;
-                    }else{
+                    }
+                    else{
                         indicatorOBVPresent = 0;
                     }
 
                     if(chartName == 'volume'){
                         indicatorVolumePresent = 1;
-                    }else{
+                    }
+                    else{
                         indicatorVolumePresent = 0;
                     }
                     break;
                 case 'momentum':
                     if(chartName == 'macd'){
                         chartMomentumPresent += 3;
-                    }else{
+                    }
+                    else{
                         chartMomentumPresent += 1;
                     }
                     break;
                 case 'oscillator':
                     if(chartName == 'stochastic'){
                         chartOscillatorPresent += 2;
-                    }else{
+                    }
+                    else{
                         chartOscillatorPresent += 1;
                     }
                     break;
@@ -312,32 +331,68 @@ function plotStock (quote) {
                 case 'sma5':
                     getSMAOnly (stockQuote, ctr, 5);
                     typeCharts[i].pos = ctr;
-                    ctr += 2;
+                    
+                    if (showBuySellSignals) {
+                        ctr += 2;
+                    }
+                    else{
+                        ctr += 1;
+                    }
                     break;
                 case 'sma15':
                     getSMAOnly (stockQuote, ctr, 15);
                     typeCharts[i].pos = ctr;
-                    ctr += 2;
+
+                    if (showBuySellSignals) {
+                        ctr += 2;
+                    }
+                    else{
+                        ctr += 1;
+                    }
                     break;
                 case 'sma20':
                     getSMAOnly (stockQuote, ctr, 20);
                     typeCharts[i].pos = ctr;
-                    ctr += 2;
+                    
+                    if (showBuySellSignals) {
+                        ctr += 2;
+                    }
+                    else{
+                        ctr += 1;
+                    }
                     break;
                 case 'sma50':
                     getSMAOnly (stockQuote, ctr, 50);
                     typeCharts[i].pos = ctr;
-                    ctr += 2;
+                    
+                    if (showBuySellSignals) {
+                        ctr += 2;
+                    }
+                    else{
+                        ctr += 1;
+                    }
                     break;
                 case 'sma120':
                     getSMAOnly (stockQuote, ctr, 120);
                     typeCharts[i].pos = ctr;
-                    ctr += 2;
+                    
+                    if (showBuySellSignals) {
+                        ctr += 2;
+                    }
+                    else{
+                        ctr += 1;
+                    }
                     break;
                 case 'sma150':
                     getSMAOnly (stockQuote, ctr, 150);
                     typeCharts[i].pos = ctr;
-                    ctr += 2;
+                    
+                    if (showBuySellSignals) {
+                        ctr += 2;
+                    }
+                    else{
+                        ctr += 1;
+                    }
                     break;
                 case 'stochastic':
                     getStochasticOnly (stockQuote, ctr);
@@ -794,7 +849,7 @@ function getSMAOnly (quote, seriesNum, period) {
 
         seriesOptions[seriesNum] = {
                 name : 'SMA ' + period,
-                id : 'smabuysellsignal',
+                id : 'smaSignal' + period,
                 data : sma,
                 yAxis: yAxisPositions.price,
                 tooltip: {
@@ -804,23 +859,26 @@ function getSMAOnly (quote, seriesNum, period) {
 
         seriesCounter += 1;
 
-        seriesOptions[seriesNum + 1] = {
-                type : 'flags',
-                data : signals,
-                onSeries: 'smabuysellsignal',
-                shape: 'squarepin',
-                width: 16,
-                style: { // text style
-                    color: 'white'
-                },
-                states: {
-                    hover: {
-                        fillColor: '#yellowgreen' // darker
+                    
+        if (showBuySellSignals) {
+            seriesOptions[seriesNum + 1] = {
+                    type : 'flags',
+                    data : signals,
+                    onSeries: 'smaSignal' + period,
+                    shape: 'squarepin',
+                    width: 16,
+                    style: { // text style
+                        color: 'white'
+                    },
+                    states: {
+                        hover: {
+                            fillColor: '#yellowgreen' // darker
+                        }
                     }
-                }
-            };
+                };
 
-        seriesCounter += 1;
+            seriesCounter += 1;
+        }
 
         if(seriesCounter === chartTotalToPlot){
             createChart(quote);

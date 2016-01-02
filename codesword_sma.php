@@ -116,6 +116,20 @@
 						$ctr++;
 					}
 				}
+				//Do this step only if there are at least 2 sma values to compare
+				if ($i > 1) {
+					//check if slope of sma for the past 3 days is progressively positive
+					if ($curPrice < $prevPrice) {
+						//create a buy signal only if the last signal is "sell"
+						if ($ctr > 0) {
+							if ($signals[$ctr-1][1] == "buy") {
+								$signals[$ctr][0] = $sma[$i][0];
+								$signals[$ctr][1] = "sell";
+								$ctr++;
+							}
+						}
+					}
+				}
 			}
 			//Sideways
 			else {
