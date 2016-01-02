@@ -2,7 +2,9 @@
 	require_once('codesword_sma.php');
 
 	// returns Simple Moving Average Data (sma, signal, histogram)
-	function getSMA ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $samplePeriod=15, $host, $db, $user, $pass) {
+	function getSMA ($company, $from="1900-01-01 00:00:00", $to=null, 
+					$dataorg="json", $samplePeriod=15, $enSignals=false,
+					$host, $db, $user, $pass) {
 		// Create connection
 		$con=mysqli_connect($host, $user, $pass, $db);
 		
@@ -63,8 +65,12 @@
 			$sma = codesword_sma($dbreturn, $samplePeriod);
 		}
 
-		$buysellSignals = codesword_smaBuySellSignal($dbreturn, $sma);
-
+		if ($enSignals) {
+			$buysellSignals = codesword_smaBuySellSignal($dbreturn, $sma);
+		} else {
+			$buysellSignals = 0;
+		}
+		
 		$allData = [];
 		$allData[0] = $sma;
 		$allData[1] = $buysellSignals;

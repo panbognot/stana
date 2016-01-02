@@ -156,6 +156,15 @@
 		}
 	}
 
+	//enable/disable trading signals
+	if(isset($_GET['ensig'])) {
+		$ensig = $_GET['ensig']."_";
+		debug_print("Production of Trade Signals: ".$_GET['ensig']."<Br/>");	
+	}
+	else {
+		$ensig = false;
+	}
+
 	if(isset($_GET['chart'])) {
 		$chartDataType = $_GET['chart'];
 		debug_print("Date range: from $fromDate to $toDate<Br>");
@@ -192,7 +201,7 @@
 			case 'sma':
 				if(isset($_GET['period'])) {
 					$period = $_GET['period'];
-					getSMA($company, $fromDate, $toDate, $dataorg, $period, 
+					getSMA($company, $fromDate, $toDate, $dataorg, $period, $ensig,
 						$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				}
 				else {

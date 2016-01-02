@@ -818,34 +818,16 @@ var testBuySellSignal = [];
 // Get the SMA for the selected stock COPY for experimentation
 function getSMAOnly (quote, seriesNum, period) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=sma&period='+period+'&dataorg=highchart', function (data) {
+    var link = 'http://localhost/stana/getData.php?company='+quote+
+                '&timerange=10y&chart=sma&period='+period+
+                '&dataorg=highchart&ensig='+showBuySellSignals;
+
+    $.getJSON(link, function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
         //return data;
         var sma = data[0];
-
-        // split the data set into macd, signal and divergence
-        var signals = [],
-            temp = data[1],
-            dataLength = temp.length,
-            i = 0;
-
-        var tempTS, tempTitle, tempFillColor;
-
-        for (i=0; i < dataLength; i += 1) {
-            tempTS = temp[i][0];
-            tempTitle = temp[i][1];
-
-            if (tempTitle == "buy") {
-                tempFillColor = "yellowgreen";
-            }
-            else if(tempTitle == "sell"){
-                tempFillColor = "red";
-            }
-
-            signals[i] = {x: tempTS, title: tempTitle, fillColor: tempFillColor};
-        }
 
         seriesOptions[seriesNum] = {
                 name : 'SMA ' + period,
@@ -861,6 +843,28 @@ function getSMAOnly (quote, seriesNum, period) {
 
                     
         if (showBuySellSignals) {
+            // split the data set into macd, signal and divergence
+            var signals = [],
+                temp = data[1],
+                dataLength = temp.length,
+                i = 0;
+
+            var tempTS, tempTitle, tempFillColor;
+
+            for (i=0; i < dataLength; i += 1) {
+                tempTS = temp[i][0];
+                tempTitle = temp[i][1];
+
+                if (tempTitle == "buy") {
+                    tempFillColor = "yellowgreen";
+                }
+                else if(tempTitle == "sell"){
+                    tempFillColor = "red";
+                }
+
+                signals[i] = {x: tempTS, title: tempTitle, fillColor: tempFillColor};
+            }
+
             seriesOptions[seriesNum + 1] = {
                     type : 'flags',
                     data : signals,
