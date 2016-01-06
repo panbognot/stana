@@ -73,9 +73,16 @@
 					//slope must be greater than 0.1% of the current SMA value
 					//0.1% is just a rule of thumb and can still be subject to change
 					if ($slopeSma > 0) {
-						$signals[$ctr][0] = $sma[$i][0];
-						$signals[$ctr][1] = "buy";
-						$ctr++;
+						if ( ($ctr > 0) && ($signals[$ctr-1][1] == "sell") ) {
+							$signals[$ctr][0] = $sma[$i][0];
+							$signals[$ctr][1] = "buy";
+							$ctr++;
+						}
+						elseif ($ctr == 0) {
+							$signals[$ctr][0] = $sma[$i][0];
+							$signals[$ctr][1] = "buy";
+							$ctr++;
+						}
 					}
 				}
 
@@ -102,11 +109,22 @@
 					if ($ctr > 0) {
 						//generate a sell signal only if last one was a buy signal
 						if ($signals[$ctr-1][1] == "buy") {
-							//check if |curPrice/prevPrice - 1| > 1%
-							if ( (($prevPrice/$curPrice) - 1) > 0.01 ) {
-								$signals[$ctr][0] = $sma[$i][0];
-								$signals[$ctr][1] = "sell";
-								$ctr++;
+							//different thresholds depending on current price
+							if ($curPrice <= 35) {
+								//check if |curPrice/prevPrice - 1| > 2.5%
+								if ( (($prevPrice/$curPrice) - 1) > 0.025 ) {
+									$signals[$ctr][0] = $sma[$i][0];
+									$signals[$ctr][1] = "sell";
+									$ctr++;
+								}
+							}
+							else {
+								//check if |curPrice/prevPrice - 1| > 1%
+								if ( (($prevPrice/$curPrice) - 1) > 0.01 ) {
+									$signals[$ctr][0] = $sma[$i][0];
+									$signals[$ctr][1] = "sell";
+									$ctr++;
+								}
 							}
 						}
 					}
@@ -119,13 +137,47 @@
 				//Do this step only if there are at least 2 sma values to compare
 				if ($i > 1) {
 					//check if slope of sma for the past 3 days is progressively positive
-					if ($curPrice < $prevPrice) {
+					if ($prevPrice < $prevSma) {
 						//create a buy signal only if the last signal is "sell"
 						if ($ctr > 0) {
 							if ($signals[$ctr-1][1] == "buy") {
-								$signals[$ctr][0] = $sma[$i][0];
-								$signals[$ctr][1] = "sell";
-								$ctr++;
+								//different thresholds depending on current price
+								if ($curPrice <= 35) {
+									//check if |curPrice/prevPrice - 1| > 2.5%
+									if ( (($prevPrice/$curPrice) - 1) > 0.025 ) {
+										$signals[$ctr][0] = $sma[$i][0];
+										$signals[$ctr][1] = "sell";
+										$ctr++;
+									}
+								}
+								else {
+									//check if |curPrice/prevPrice - 1| > 1%
+									if ( (($prevPrice/$curPrice) - 1) > 0.01 ) {
+										$signals[$ctr][0] = $sma[$i][0];
+										$signals[$ctr][1] = "sell";
+										$ctr++;
+									}
+								}
+							}
+						}
+					}
+				}
+				//Do this step only if there are at least 3 sma values to compare
+				if ($i > 2) {
+					$prev2daysPrice = $real[$i + $diff - 2][1];
+					$prev2daysSma = $sma[$i - 2][1];
+
+					//check if slope of sma for the past 3 days is progressively negative
+					if ( ($prevPrice < $prevSma) && ($prev2daysPrice < $prev2daysSma) ) {
+						//create a buy signal only if the last signal is "sell"
+						if ($ctr > 0) {
+							//check if (curSma / curPrice) - 1 > 2%
+							if ( (($curSma/$curPrice) - 1) > 0.02 ) {
+								if ($signals[$ctr-1][1] == "buy") {
+									$signals[$ctr][0] = $sma[$i][0];
+									$signals[$ctr][1] = "sell";
+									$ctr++;
+								}
 							}
 						}
 					}
