@@ -201,6 +201,12 @@
 	function codesword_smaConsolidate($real, $smaShort, $smaMedium, $smaLong) {
 		$smaConsolidated = [];
 		
+		for ($i=0; $i < count($real); $i++) { 
+			// get timestamp
+			$smaConsolidated[$i][0] = $real[$i][0];
+			$smaConsolidated[$i][1] = $real[$i][1];
+		}
+
 		// get timestamp difference of Real vs SMA Short
 		$diffShort = 0;
 		for ($i=0; $i < count($smaShort); $i++) {
@@ -208,7 +214,7 @@
 			$realTS = $real[$diffShort][0];
 
 			if ($smaTS == $realTS) {
-				echo "diffShort: $diffShort <Br>";
+				//echo "diffShort: $diffShort <Br>";
 				break;
 			}
 
@@ -222,7 +228,7 @@
 			$realTS = $real[$diffMedium][0];
 
 			if ($smaTS == $realTS) {
-				echo "diffMedium: $diffMedium <Br>";
+				//echo "diffMedium: $diffMedium <Br>";
 				break;
 			}
 
@@ -236,13 +242,43 @@
 			$realTS = $real[$diffLong][0];
 
 			if ($smaTS == $realTS) {
-				echo "diffLong: $diffLong <Br>";
+				//echo "diffLong: $diffLong <Br>";
 				break;
 			}
 
 			$diffLong++;
 		}
 
-		//Pad the null values with first good data
+		// Fill the consolidated data
+		for ($i=0; $i < count($real); $i++) { 
+			//pad the smaShort with -1 for the null values
+			if ($i < $diffShort) {
+				//negative value so that its easy to filter on the JS side
+				$smaConsolidated[$i][2] = -1;
+			}
+			elseif ($i > $diffShort) {
+			 	$smaConsolidated[$i][2] = $smaShort[$i - $diffShort][1];
+			}
+
+			//pad the smaShort with -1 for the null values
+			if ($i < $diffMedium) {
+				//negative value so that its easy to filter on the JS side
+				$smaConsolidated[$i][3] = -1;
+			}
+			elseif ($i > $diffMedium) {
+			 	$smaConsolidated[$i][3] = $smaMedium[$i - $diffMedium][1];
+			}
+
+			//pad the smaShort with -1 for the null values
+			if ($i < $diffMedium) {
+				//negative value so that its easy to filter on the JS side
+				$smaConsolidated[$i][4] = -1;
+			}
+			elseif ($i > $diffLong) {
+			 	$smaConsolidated[$i][4] = $smaLong[$i - $diffLong][1];
+			}
+		}
+
+		echo json_encode($smaConsolidated);
 	}
 ?>
