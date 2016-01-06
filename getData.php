@@ -202,11 +202,17 @@
 				if(isset($_GET['period'])) {
 					$period = $_GET['period'];
 					getSMA($company, $fromDate, $toDate, $dataorg, $period, $ensig,
+						true,
 						$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				}
 				else {
 					echo "Error: No period selected";
 				}
+				break;
+			case 'smac':
+				getSMACombined($company, $fromDate, $toDate, $dataorg, 
+					20, 50, 120, $ensig, 
+					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				break;
 			case 'tr':
 				getTrueRange($company, $fromDate, $toDate, $dataorg, 

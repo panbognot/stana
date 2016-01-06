@@ -194,4 +194,55 @@
 
 		return $signals;
 	}
+
+	// real - [timestamp, close price]
+	// smaShort, smaMedium, smaLong - [timestamp, sma]
+	// Returns - [timestamp, close, short, medium, long]
+	function codesword_smaConsolidate($real, $smaShort, $smaMedium, $smaLong) {
+		$smaConsolidated = [];
+		
+		// get timestamp difference of Real vs SMA Short
+		$diffShort = 0;
+		for ($i=0; $i < count($smaShort); $i++) {
+			$smaTS = $smaShort[0][0];
+			$realTS = $real[$diffShort][0];
+
+			if ($smaTS == $realTS) {
+				echo "diffShort: $diffShort <Br>";
+				break;
+			}
+
+			$diffShort++;
+		}
+
+		// get timestamp difference of Real vs SMA Medium
+		$diffMedium = 0;
+		for ($i=0; $i < count($smaMedium); $i++) {
+			$smaTS = $smaMedium[0][0];
+			$realTS = $real[$diffMedium][0];
+
+			if ($smaTS == $realTS) {
+				echo "diffMedium: $diffMedium <Br>";
+				break;
+			}
+
+			$diffMedium++;
+		}
+
+		// get timestamp difference of Real vs SMA Long
+		$diffLong = 0;
+		for ($i=0; $i < count($smaLong); $i++) {
+			$smaTS = $smaLong[0][0];
+			$realTS = $real[$diffLong][0];
+
+			if ($smaTS == $realTS) {
+				echo "diffLong: $diffLong <Br>";
+				break;
+			}
+
+			$diffLong++;
+		}
+
+		//Pad the null values with first good data
+	}
 ?>
