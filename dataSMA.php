@@ -172,7 +172,7 @@
 		$allData = [];
 
 		if ($enSignals) {
-			$allData = codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong);
+			$allData = codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong, $dataorg);
 		} 
 		else {
 			$allData[0] = codesword_smaConsolidate($real, $smaShort, $smaMedium, $smaLong);

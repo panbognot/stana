@@ -282,12 +282,33 @@
 		return $smaConsolidated;
 	}
 
+	// Returns the difference in days between dates
+	function codesword_dateDiff($datePrev, $dateCur, $dataorg="json") {
+		$dateDiff = 0;
+		if ($dataorg == "json") {
+			//temporary
+			$dateDiff = 0;
+		}
+		elseif ($dataorg == "highchart") {
+			$oneDay = 86400000;
+			$dateDiff = ($dateCur - $datePrev) / $oneDay;
+			//echo "date diff: $dateDiff<Br>";
+		}
+		else {
+			echo "<Br>dataorg is $dataorg<Br>";
+		}
+
+		return $dateDiff;
+	}
+
+
 	// real - [timestamp, close price]
 	// smaShort, smaMedium, smaLong - [timestamp, sma]
 	// Returns - [timestamp, close, short, medium, long]
-	function codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong) {
+	function codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong, $dataorg="json") {
 		$smaConsolidated = codesword_smaConsolidate($real, $smaShort, $smaMedium, $smaLong);
 		$tradeSignals = [];
+
 		$ctr = 0;
 
 		for ($i=0; $i < count($smaConsolidated); $i++) { 
@@ -296,6 +317,12 @@
 			$curSmaShort = isset($smaConsolidated[$i][2]) ? $smaConsolidated[$i][2] : -1;
 			$curSmaMedium = isset($smaConsolidated[$i][3]) ? $smaConsolidated[$i][3] : -1;
 			$curSmaLong = isset($smaConsolidated[$i][4]) ? $smaConsolidated[$i][4] : -1;
+
+			if ($i == 0) {
+				$prevPrice = $smaConsolidated[$i][1];
+				$prevSmaShort = $smaConsolidated[$i][2];
+				continue;
+			}
 
 			//Only make decisions for cases where all SMAs have values
 			if (($curSmaShort > 0) &&
@@ -317,12 +344,16 @@
 							if ($tradeSignals[$ctr-1][1] == "sell") {
 								$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
 								$tradeSignals[$ctr][1] = "buy";
+								$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
+																			$tradeSignals[$ctr][0], 
+																			$dataorg);
 								$ctr++;
 							}
 						}
 						else {
 							$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
 							$tradeSignals[$ctr][1] = "buy";
+							$tradeSignals[$ctr][2] = 0;
 							$ctr++;
 						}
 					}
@@ -330,16 +361,37 @@
 					//RoT #2: Sell. Price < s20
 					if ($curPrice < $curSmaShort) {
 						if ($ctr > 0) {
-							//to filter out redundant sell signals
+							//generate a sell signal only if last one was a buy signal
 							if ($tradeSignals[$ctr-1][1] == "buy") {
-								$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
-								$tradeSignals[$ctr][1] = "sell";
-								$ctr++;
+								//different thresholds depending on current price
+								if ($curPrice <= 35) {
+									//check if |curPrice/prevPrice - 1| > 2.5%
+									if ( (($prevPrice/$curPrice) - 1) > 0.025 ) {
+										$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+										$tradeSignals[$ctr][1] = "sell";
+										$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
+																			$tradeSignals[$ctr][0], 
+																			$dataorg);
+										$ctr++;
+									}
+								}
+								else {
+									//check if |curPrice/prevPrice - 1| > 1%
+									if ( (($prevPrice/$curPrice) - 1) > 0.01 ) {
+										$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+										$tradeSignals[$ctr][1] = "sell";
+										$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
+																			$tradeSignals[$ctr][0], 
+																			$dataorg);
+										$ctr++;
+									}
+								}
 							}
 						}
 						else {
 							$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
 							$tradeSignals[$ctr][1] = "sell";
+							$tradeSignals[$ctr][2] = 0;
 							$ctr++;
 						}
 					}
@@ -348,6 +400,10 @@
 				//Downtrend
 				//Mostly about generating trade signals from possible reversals
 			}
+
+			//fix for "undefined offset" notice
+			$prevPrice = isset($smaConsolidated[$i][1]) ? $smaConsolidated[$i][1] : -1;
+			$prevSmaShort = isset($smaConsolidated[$i][2]) ? $smaConsolidated[$i][2] : -1;
 		}
 
 		$allData = [];

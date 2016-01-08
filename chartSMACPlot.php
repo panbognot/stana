@@ -28,7 +28,7 @@ var testData, testData2;
 function plotStock () {
     var company = "<?php echo $company; ?>";
     //$.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=smac&dataorg=highchart&ensig=true', function (data) {
-    $.getJSON('http://localhost/stana/getData.php?company='+company+'&timerange=10y&chart=smac&dataorg=highchart&ensig=true', function (data) {    
+    $.getJSON('http://localhost/stana/getData.php?company='+company+'&timerange=3y&chart=smac&dataorg=highchart&ensig=true', function (data) {    
     	testData = data;
         var chartValues = data[0];
 
