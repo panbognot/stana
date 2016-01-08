@@ -297,12 +297,56 @@
 			$curSmaMedium = isset($smaConsolidated[$i][3]) ? $smaConsolidated[$i][3] : -1;
 			$curSmaLong = isset($smaConsolidated[$i][4]) ? $smaConsolidated[$i][4] : -1;
 
-			if (($curPrice > $curSmaShort) &&
-				($curPrice > $curSmaMedium) &&
-				($curPrice > $curSmaLong)) {
-				$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
-				$tradeSignals[$ctr][1] = "buy";
-				$ctr++;
+			//Only make decisions for cases where all SMAs have values
+			if (($curSmaShort > 0) &&
+				($curSmaMedium > 0) &&
+				($curSmaLong > 0)) {
+
+				//Segregate into uptrend, downtrend and sideways
+
+				//Uptrend
+				// SMA short > SMA medium > SMA long
+				if (($curSmaShort >= $curSmaMedium) &&
+					($curSmaMedium >= $curSmaLong) ) {
+					//RoT #1: Buy. Price > s20 > s50 > s120
+					if (($curPrice > $curSmaShort) &&
+						($curPrice > $curSmaMedium) &&
+						($curPrice > $curSmaLong)) {
+						if ($ctr > 0) {
+							//to filter out redundant buy signals
+							if ($tradeSignals[$ctr-1][1] == "sell") {
+								$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+								$tradeSignals[$ctr][1] = "buy";
+								$ctr++;
+							}
+						}
+						else {
+							$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+							$tradeSignals[$ctr][1] = "buy";
+							$ctr++;
+						}
+					}
+
+					//RoT #2: Sell. Price < s20
+					if ($curPrice < $curSmaShort) {
+						if ($ctr > 0) {
+							//to filter out redundant sell signals
+							if ($tradeSignals[$ctr-1][1] == "buy") {
+								$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+								$tradeSignals[$ctr][1] = "sell";
+								$ctr++;
+							}
+						}
+						else {
+							$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+							$tradeSignals[$ctr][1] = "sell";
+							$ctr++;
+						}
+					}
+				}
+
+				//Downtrend
+				//Mostly about generating trade signals from possible reversals
 			}
 		}
 

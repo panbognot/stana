@@ -10,12 +10,25 @@
 <body>
 	<div id="container" style="height: 600px; min-width: 310px"></div>
 </body>
+
+<?php
+    //select the company you want to view
+    if(isset($_GET['company'])) {
+        $company = $_GET['company']."";
+    }
+    else {
+        //echo "ERROR: No Company was selected<Br/>";
+        $company = "smc";
+    }
+?>
+
 <script type="text/javascript">
 var testData, testData2;
 
 function plotStock () {
-    //$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=aapl-c.json&callback=?', function (data) {
-    $.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=smac&dataorg=highchart&ensig=true', function (data) {
+    var company = "<?php echo $company; ?>";
+    //$.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=smac&dataorg=highchart&ensig=true', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+company+'&timerange=10y&chart=smac&dataorg=highchart&ensig=true', function (data) {    
     	testData = data;
         var chartValues = data[0];
 
@@ -102,7 +115,7 @@ function plotStock () {
             },
 
             series : [{
-                name : 'Close',
+                name : company.toUpperCase() + ' Close',
                 id : "closePrice",
                 data : close,
                 tooltip: {
