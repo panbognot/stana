@@ -287,8 +287,29 @@
 	// Returns - [timestamp, close, short, medium, long]
 	function codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong) {
 		$smaConsolidated = codesword_smaConsolidate($real, $smaShort, $smaMedium, $smaLong);
+		$tradeSignals = [];
+		$ctr = 0;
 
-		//echo json_encode($smaConsolidated);
-		return $smaConsolidated;
+		for ($i=0; $i < count($smaConsolidated); $i++) { 
+			$curDate = $smaConsolidated[$i][0];
+			$curPrice = isset($smaConsolidated[$i][1]) ? $smaConsolidated[$i][1] : -1;
+			$curSmaShort = isset($smaConsolidated[$i][2]) ? $smaConsolidated[$i][2] : -1;
+			$curSmaMedium = isset($smaConsolidated[$i][3]) ? $smaConsolidated[$i][3] : -1;
+			$curSmaLong = isset($smaConsolidated[$i][4]) ? $smaConsolidated[$i][4] : -1;
+
+			if (($curPrice > $curSmaShort) &&
+				($curPrice > $curSmaMedium) &&
+				($curPrice > $curSmaLong)) {
+				$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+				$tradeSignals[$ctr][1] = "buy";
+				$ctr++;
+			}
+		}
+
+		$allData = [];
+		$allData[0] = $smaConsolidated;
+		$allData[1] = $tradeSignals;
+
+		return $allData;
 	}
 ?>

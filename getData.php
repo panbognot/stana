@@ -11,7 +11,7 @@
 	require_once('dataBollinger.php');
 
 	//initialize variables
-	$debug_mode = False;
+	$debug_mode = false;
 	$toDate;
 	$fromDate;
 	$dataorg;
@@ -158,11 +158,19 @@
 
 	//enable/disable trading signals
 	if(isset($_GET['ensig'])) {
-		$ensig = $_GET['ensig']."_";
+		$ensig = $_GET['ensig'];
+
+		if ($ensig == "true") {
+			$ensig = true;
+		} else {
+			$ensig = false;
+		}
+
 		debug_print("Production of Trade Signals: ".$_GET['ensig']."<Br/>");	
 	}
 	else {
 		$ensig = false;
+		debug_print("Production of Trade Signals: false<Br/>");	
 	}
 
 	if(isset($_GET['chart'])) {
