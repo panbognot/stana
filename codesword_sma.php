@@ -279,6 +279,16 @@
 			}
 		}
 
-		echo json_encode($smaConsolidated);
+		return $smaConsolidated;
+	}
+
+	// real - [timestamp, close price]
+	// smaShort, smaMedium, smaLong - [timestamp, sma]
+	// Returns - [timestamp, close, short, medium, long]
+	function codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong) {
+		$smaConsolidated = codesword_smaConsolidate($real, $smaShort, $smaMedium, $smaLong);
+
+		//echo json_encode($smaConsolidated);
+		return $smaConsolidated;
 	}
 ?>

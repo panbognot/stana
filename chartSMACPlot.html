@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Stock Price Plot</title>
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://code.highcharts.com/stock/highstock.js"></script>
+	<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
+</head>
+<body>
+	<div id="container" style="height: 600px; min-width: 310px"></div>
+</body>
+<script type="text/javascript">
+var testData, testData2;
+
+function plotStock () {
+    //$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=aapl-c.json&callback=?', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=smac&dataorg=highchart', function (data) {
+    	testData = data;
+        var chartValues = data[0];
+        var signalsBuySell = data[1];
+
+        // split the data set into close and divergence
+        var close = [],
+            smaShort = [],
+            smaMedium = [],
+            smaLong = [],
+            dataLength = chartValues.length,
+            // set the allowed units for data grouping
+            groupingUnits = [[
+                'week',                         // unit name
+                [1]                             // allowed multiples
+            ], [
+                'month',
+                [1, 2, 3, 4, 6]
+            ]],
+
+            i = 0;
+
+        for (i; i < dataLength; i += 1) {
+            close.push([
+                chartValues[i][0], // the date
+                chartValues[i][1], // close
+            ]);
+
+            smaShort.push([
+                chartValues[i][0], // the date
+                chartValues[i][2], // sma short term
+            ]);
+
+            smaMedium.push([
+                chartValues[i][0], // the date
+                chartValues[i][3], // sma medium term
+            ]);
+
+            smaLong.push([
+                chartValues[i][0], // the date
+                chartValues[i][4], // sma long term
+            ]);
+        }
+
+        // Create the chart
+        $('#container').highcharts('StockChart', {
+
+            rangeSelector : {
+                selected : 1
+            },
+
+            title : {
+                text : 'SMC Simple Moving Average Combined'
+            },
+
+            series : [{
+                name : 'Close',
+                data : close,
+                tooltip: {
+                    valueDecimals: 2
+                }
+            },
+            {
+                name : 'SMA Short Term',
+                data : smaShort,
+                tooltip: {
+                    valueDecimals: 2
+                }
+            },
+            {
+                name : 'SMA Medium Term',
+                data : smaMedium,
+                tooltip: {
+                    valueDecimals: 2
+                }
+            },
+            {
+                name : 'SMA Long Term',
+                data : smaLong,
+                tooltip: {
+                    valueDecimals: 2
+                }
+            }]
+        });
+    });
+}
+
+plotStock();
+</script>
+</html>

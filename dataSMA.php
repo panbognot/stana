@@ -165,18 +165,20 @@
 					$dataorg, $periodShort, $enSignals,
 					$host, $db, $user, $pass);
 
-		codesword_smaConsolidate($real, $smaShort, $smaMedium, $smaLong);
+		$smaCombined = codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong);
+
+		//echo json_encode($smaCombined);
 
 /*		if ($enSignals) {
 			$buysellSignals = codesword_smaBuySellSignal($dbreturn, $smaShort);
 		} else {
 			$buysellSignals = 0;
-		}
+		}*/
 		
 		$allData = [];
-		$allData[0] = $smaShort;
-		$allData[1] = $buysellSignals;
+		$allData[0] = $smaCombined;
+		$allData[1] = 0;//$buysellSignals;
 
-		echo json_encode($allData);*/
+		echo json_encode($allData);
 	}
 ?>
