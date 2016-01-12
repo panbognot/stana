@@ -111,7 +111,7 @@ function plotStock () {
             },
 
             title : {
-                text : 'SMC Simple Moving Average Combined'
+                text : company.toUpperCase() + ' Simple Moving Average Combined'
             },
 
             series : [{
