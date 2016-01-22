@@ -339,26 +339,32 @@
 					if (($curPrice > $curSmaShort) &&
 						($curPrice > $curSmaMedium) &&
 						($curPrice > $curSmaLong)) {
-						if ($ctr > 0) {
-							//to filter out redundant buy signals
-							if ($tradeSignals[$ctr-1][1] == "sell") {
+
+						$prevPrevPrice = isset($smaConsolidated[$i-2][1]) ? $smaConsolidated[$i-2][1] : 100000;
+
+						if (($curPrice > $prevPrice) && 
+							($curPrice > $prevPrevPrice)) {
+							if ($ctr > 0) {
+								//to filter out redundant buy signals
+								if ($tradeSignals[$ctr-1][1] == "sell") {
+									$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+									$tradeSignals[$ctr][1] = "buy";
+									$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
+																				$tradeSignals[$ctr][0], 
+																				$dataorg);
+									$ctr++;
+								}
+							}
+							else {
 								$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
 								$tradeSignals[$ctr][1] = "buy";
-								$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
-																			$tradeSignals[$ctr][0], 
-																			$dataorg);
+								$tradeSignals[$ctr][2] = 0;
 								$ctr++;
 							}
 						}
-						else {
-							$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
-							$tradeSignals[$ctr][1] = "buy";
-							$tradeSignals[$ctr][2] = 0;
-							$ctr++;
-						}
 					}
 
-					//RoT #2: Sell. Price < s20
+					//RoT #2.2: Sell. Price < s20 (if Uptrending)
 					if ($curPrice < $curSmaShort) {
 						if ($ctr > 0) {
 							//generate a sell signal only if last one was a buy signal
@@ -399,6 +405,109 @@
 
 				//Downtrend
 				//Mostly about generating trade signals from possible reversals
+				//sma long > sma short and sma long > sma medium
+				elseif (($curSmaShort <= $curSmaLong) &&
+					($curSmaMedium <= $curSmaLong) ) {
+
+					//new RoT (unlabeled)
+					//you need at least 5 samples to make this conclusion
+					//price is greater than sma short and sma medium
+					//and the difference between sma short and sma medium is
+					//getting smaller
+					if ($i >= 4) {
+						$curTempSma = 0;
+						if ($curSmaShort >= $curSmaMedium) {
+							$curTempSma = $curSmaShort;
+						} else {
+							$curTempSma = $curSmaMedium;
+						}
+						
+						//Price should at least be 5% greater than both SMAs
+						if (($curPrice > $curSmaShort) &&
+							($curPrice > $curSmaMedium) &&
+							(($curPrice/$curTempSma) - 1 > 0.05) ) {
+							$divergencePoints = 0;
+							$prevDiff = 100;
+
+							//check the differences of sma short and sma medium
+							// to see if its getting smaller
+							for ($k=4; $k >= 0; $k--) { 
+								$tempSmaShort = isset($smaConsolidated[$i-$k][2]) ? $smaConsolidated[$i-$k][2] : -1;
+								$tempSmaMedium = isset($smaConsolidated[$i-$k][3]) ? $smaConsolidated[$i-$k][3] : -1;
+								$tempDiff = abs($tempSmaShort - $tempSmaMedium);
+
+								if ($tempDiff <= $prevDiff) {
+									$divergencePoints++;
+								}
+								
+								$prevDiff = $tempDiff;
+							}
+
+							if ($divergencePoints >= 3) {
+								if ($ctr > 0) {
+									//to filter out redundant buy signals
+									if ($tradeSignals[$ctr-1][1] == "sell") {
+										$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+										$tradeSignals[$ctr][1] = "buy";
+										$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
+																					$tradeSignals[$ctr][0], 
+																					$dataorg);
+										$ctr++;
+									}
+								}
+								else {
+									$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+									$tradeSignals[$ctr][1] = "buy";
+									$tradeSignals[$ctr][2] = 0;
+									$ctr++;
+								}
+							}
+						}
+					}
+				}
+
+				//Sideways Movement
+				else {
+
+				}
+
+				//RoT #2.1: Sell automatically when Price < sma medium
+				if ($curPrice < $curSmaMedium) {
+					if ($ctr > 0) {
+						//generate a sell signal only if last one was a buy signal
+						if ($tradeSignals[$ctr-1][1] == "buy") {
+							//different thresholds depending on current price
+							if ($curPrice <= 35) {
+								//check if |curSmaMedium/prevPrice - 1| > 2.5%
+								if ( (($curSmaMedium/$curPrice) - 1) > 0.025 ) {
+									$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+									$tradeSignals[$ctr][1] = "sell";
+									$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
+																		$tradeSignals[$ctr][0], 
+																		$dataorg);
+									$ctr++;
+								}
+							}
+							else {
+								//check if |curSmaMedium/prevPrice - 1| > 1.3%
+								if ( (($curSmaMedium/$curPrice) - 1) > 0.013 ) {
+									$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+									$tradeSignals[$ctr][1] = "sell";
+									$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
+																		$tradeSignals[$ctr][0], 
+																		$dataorg);
+									$ctr++;
+								}
+							}
+						}
+					}
+					else {
+						$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+						$tradeSignals[$ctr][1] = "sell";
+						$tradeSignals[$ctr][2] = 0;
+						$ctr++;
+					}
+				}
 			}
 
 			//fix for "undefined offset" notice
