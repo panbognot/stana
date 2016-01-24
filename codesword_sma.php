@@ -373,6 +373,18 @@
 								if ($curPrice <= 35) {
 									//check if |curPrice/prevPrice - 1| > 2.5%
 									if ( (($prevPrice/$curPrice) - 1) > 0.025 ) {
+										//sell if s20/curPrice - 1 > 0.025
+										if ( (($curSmaShort/$curPrice) - 1) > 0.025 ) {
+											$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+											$tradeSignals[$ctr][1] = "sell";
+											$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
+																				$tradeSignals[$ctr][0], 
+																				$dataorg);
+											$ctr++;
+										}
+									}
+									//sell if s20/curPrice - 1 > 0.03
+									elseif ( (($curSmaShort/$curPrice) - 1) > 0.03 ) {
 										$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
 										$tradeSignals[$ctr][1] = "sell";
 										$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
@@ -391,6 +403,7 @@
 																			$dataorg);
 										$ctr++;
 									}
+									//TODO: if s20/curPrice - 1 > [arbitrary number for bigger prices]
 								}
 							}
 						}
