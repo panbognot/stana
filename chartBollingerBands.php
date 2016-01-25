@@ -11,12 +11,25 @@
 <body>
 	<div id="container" style="height: 600px; min-width: 310px"></div>
 </body>
+
+<?php
+    //select the company you want to view
+    if(isset($_GET['company'])) {
+        $company = $_GET['company']."";
+    }
+    else {
+        //echo "ERROR: No Company was selected<Br/>";
+        $company = "smc";
+    }
+?>
+
 <script type="text/javascript">
 var testData, testData2;
 
 function plotStock () {
+    var company = "<?php echo $company; ?>";
     //$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=aapl-c.json&callback=?', function (data) {
-    $.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=bollinger&dataorg=highchart', function (data) {
+    $.getJSON('http://localhost/stana/getData.php?company='+company+'&timerange=3y&chart=bollinger&dataorg=highchart', function (data) {
     	testData = data;
 
         // split the data set into sma, bollinger upper band, bollinger lower band
@@ -54,7 +67,7 @@ function plotStock () {
             },
 
             title : {
-                text : 'Bollinger Bands Plot'
+                text : company.toUpperCase() + ' Bollinger Bands Plot'
             },
 
             yAxis : [{
