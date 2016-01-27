@@ -1,4 +1,4 @@
-var testData, testData2;
+var testData = 0, testData2 = 0;
 var stockQuote = null;
 
 function dynamicDataURL () {
@@ -617,6 +617,8 @@ function getClosePricesOnly (quote, seriesNum) {
     $.getJSON(dataURL, function (data) {
         ajaxDoneLoading = true;
 
+        testData = data;
+
         // do some kind of pre processing if needed
         //return data;
 
@@ -644,6 +646,8 @@ function getCandlestickOnly (quote, seriesNum) {
     dataURL = dynamicDataURL() + 'getData.php?company='+quote+'&timerange=10y&chart=ohlc&dataorg=highchart';
     $.getJSON(dataURL, function (data) {
         ajaxDoneLoading = true;
+
+        testData = data;
 
         // do some kind of pre processing if needed
         // split the data set into ohlc and volume
@@ -695,6 +699,8 @@ function getMACDOnly (quote, seriesNum) {
     dataURL = dynamicDataURL() + 'getData.php?company='+quote+'&timerange=10y&chart=macd&dataorg=highchart';
     $.getJSON(dataURL, function (data) {
         ajaxDoneLoading = true;
+
+        testData = data;
 
         // do some kind of pre processing if needed
         // split the data set into macd, signal and divergence
