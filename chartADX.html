@@ -5,20 +5,17 @@
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://code.highcharts.com/stock/highstock.js"></script>
 	<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
-  <!--   /*<script src="js/dynamicpath.js"></script>*/ -->
+    <script src="js/dynamicpath.js"></script>
 
 </head>
 <body>
 	<div id="container" style="height: 600px; min-width: 310px"></div>
 </body>
 <script type="text/javascript">
-import dynamicDataURL from 'js/dynamicpath';
-
 var testData, testData2;
 
 function plotStock () {
     dataURL = dynamicDataURL() + "getData.php?company=smc&timerange=3y&chart=adx&dataorg=highchart";
-
     $.getJSON(dataURL, function (data) {
     	testData = data;
 
