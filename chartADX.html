@@ -14,8 +14,21 @@
 var testData, testData2;
 
 function plotStock () {
-    //$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=aapl-c.json&callback=?', function (data) {
-    $.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=adx&dataorg=highchart', function (data) {
+    //dynamically detect the URL assignment
+    var url;
+    if (window.location.hostname == "localhost") {
+        url = "http://localhost/stana/";
+    } 
+    else if (window.location.hostname == "www.codesword.com") {
+        url = "http://www.codesword.com/stocksta/";
+    }
+    else {
+        url = "http://localhost/stana/";
+    };
+    url = url + "getData.php?company=smc&timerange=3y&chart=adx&dataorg=highchart";
+
+    //$.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=adx&dataorg=highchart', function (data) {
+    $.getJSON(url, function (data) {
     	testData = data;
 
         // Create the chart

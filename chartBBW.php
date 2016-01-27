@@ -10,11 +10,24 @@
 <body>
 	<div id="container" style="height: 600px; min-width: 310px"></div>
 </body>
+
+<?php
+    //select the company you want to view
+    if(isset($_GET['company'])) {
+        $company = $_GET['company']."";
+    }
+    else {
+        //echo "ERROR: No Company was selected<Br/>";
+        $company = "smc";
+    }
+?>
+
 <script type="text/javascript">
 var testData, testData2;
 
 function plotStock () {
-    $.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=bbw&dataorg=highchart', function (data) {
+    var company = "<?php echo $company; ?>";
+    $.getJSON('http://localhost/stana/getData.php?company='+company+'&timerange=3y&chart=bbw&dataorg=highchart', function (data) {
     	testData = data;
 
         // Create the chart
@@ -25,7 +38,7 @@ function plotStock () {
             },
 
             title : {
-                text : 'SMC Bollinger Bands Width'
+                text : company.toUpperCase() + ' Bollinger Bands Width'
             },
 
             series : [{

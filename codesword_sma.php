@@ -344,7 +344,28 @@
 
 						if (($curPrice > $prevPrice) && 
 							($curPrice > $prevPrevPrice)) {
-							if ($ctr > 0) {
+							//Buy only if price increase wrt to the sma short is 5% higher
+							if ( (($curPrice / $curSmaShort) - 1) > 0.05 ) {
+								if ($ctr > 0) {
+									//to filter out redundant buy signals
+									if ($tradeSignals[$ctr-1][1] == "sell") {
+										$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+										$tradeSignals[$ctr][1] = "buy";
+										$tradeSignals[$ctr][2] = codesword_dateDiff($tradeSignals[$ctr-1][0], 
+																					$tradeSignals[$ctr][0], 
+																					$dataorg);
+										$ctr++;
+									}
+								}
+								else {
+									$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
+									$tradeSignals[$ctr][1] = "buy";
+									$tradeSignals[$ctr][2] = 0;
+									$ctr++;
+								}
+							}
+
+/*							if ($ctr > 0) {
 								//to filter out redundant buy signals
 								if ($tradeSignals[$ctr-1][1] == "sell") {
 									$tradeSignals[$ctr][0] = $smaConsolidated[$i][0];
@@ -360,7 +381,8 @@
 								$tradeSignals[$ctr][1] = "buy";
 								$tradeSignals[$ctr][2] = 0;
 								$ctr++;
-							}
+							}*/
+
 						}
 					}
 
