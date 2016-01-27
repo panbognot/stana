@@ -8,7 +8,7 @@ function dynamicDataURL () {
         dataURL = "http://www.codesword.com/stocksta/";
     }
     else {
-        dataURL = "http://localhost/stana/";
+        dataURL = "";
     };
 
     return dataURL;

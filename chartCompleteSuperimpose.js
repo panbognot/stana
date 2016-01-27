@@ -1,6 +1,22 @@
 var testData, testData2;
 var stockQuote = null;
 
+function dynamicDataURL () {
+    //dynamically detect the URL assignment
+    var dataURL;
+    if (window.location.hostname == "localhost") {
+        dataURL = "http://localhost/stana/";
+    } 
+    else if (window.location.hostname == "www.codesword.com") {
+        dataURL = "http://www.codesword.com/stocksta/";
+    }
+    else {
+        dataURL = "http://localhost/stana/";
+    };
+
+    return dataURL;
+}
+
 //var typeCharts = ['close','candlestick','macd','obv','rsi','stochastic','volume'];
 var typeCharts = [
                     {chart: 'close', indicatorType: 'price', type: 'spline', pos: -1},
@@ -597,7 +613,8 @@ function createChart (quote) {
 // Get the Close Prices for the selected stock
 function getClosePricesOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=close&dataorg=highchart', function (data) {
+    dataURL = dynamicDataURL() + 'getData.php?company='+quote+'&timerange=10y&chart=close&dataorg=highchart';
+    $.getJSON(dataURL, function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -624,7 +641,8 @@ function getClosePricesOnly (quote, seriesNum) {
 // Get the Candlestick Prices for the selected stock
 function getCandlestickOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=ohlc&dataorg=highchart', function (data) {
+    dataURL = dynamicDataURL() + 'getData.php?company='+quote+'&timerange=10y&chart=ohlc&dataorg=highchart';
+    $.getJSON(dataURL, function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -674,7 +692,8 @@ function getCandlestickOnly (quote, seriesNum) {
 // Get the MACD for the selected stock
 function getMACDOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=macd&dataorg=highchart', function (data) {
+    dataURL = dynamicDataURL() + 'getData.php?company='+quote+'&timerange=10y&chart=macd&dataorg=highchart';
+    $.getJSON(dataURL, function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
