@@ -11,7 +11,7 @@ function dynamicDataURL () {
         dataURL = "http://www.codesword.com/stocksta/";
     }
     else {
-        dataURL = "http://localhost/stana/";
+        dataURL = "";
     };
 
     return dataURL;
@@ -760,7 +760,8 @@ function getMACDOnly (quote, seriesNum) {
 // Get the On Balance Volume for the selected stock
 function getOBVOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=obv&dataorg=highchart', function (data) {
+    dataURL = dynamicDataURL() + 'getData.php?company='+quote+'&timerange=10y&chart=obv&dataorg=highchart';
+    $.getJSON(dataURL, function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -798,7 +799,8 @@ function getOBVOnly (quote, seriesNum) {
 // Get the Relative Strength Index for the selected stock
 function getRSIOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=rsi&dataorg=highchart', function (data) {
+    dataURL = dynamicDataURL() + 'getData.php?company='+quote+'&timerange=10y&chart=rsi&dataorg=highchart';
+    $.getJSON(dataURL, function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -837,7 +839,7 @@ var testBuySellSignal = [];
 // Get the SMA for the selected stock COPY for experimentation
 function getSMAOnly (quote, seriesNum, period) {
     ajaxDoneLoading = false;
-    var link = 'http://localhost/stana/getData.php?company='+quote+
+    var link = dynamicDataURL() + 'getData.php?company='+quote+
                 '&timerange=10y&chart=sma&period='+period+
                 '&dataorg=highchart&ensig='+showBuySellSignals;
 
@@ -912,7 +914,8 @@ function getSMAOnly (quote, seriesNum, period) {
 // Get the Stochastic Plot for the selected stock
 function getStochasticOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=stoch&dataorg=highchart', function (data) {
+    dataURL = dynamicDataURL() + 'getData.php?company='+quote+'&timerange=10y&chart=stoch&dataorg=highchart';
+    $.getJSON(dataURL, function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
@@ -973,7 +976,8 @@ function getStochasticOnly (quote, seriesNum) {
 // Get Volume for the selected stock
 function getVolumeOnly (quote, seriesNum) {
     ajaxDoneLoading = false;
-    $.getJSON('http://localhost/stana/getData.php?company='+quote+'&timerange=10y&chart=volume&dataorg=highchart', function (data) {
+    dataURL = dynamicDataURL() + 'getData.php?company='+quote+'&timerange=10y&chart=volume&dataorg=highchart';
+    $.getJSON(dataURL, function (data) {
         ajaxDoneLoading = true;
 
         // do some kind of pre processing if needed
