@@ -5,6 +5,7 @@
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://code.highcharts.com/stock/highstock.js"></script>
 	<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="js/dynamicpath.js"></script>
 
 </head>
 <body>
@@ -14,21 +15,9 @@
 var testData, testData2;
 
 function plotStock () {
-    //dynamically detect the URL assignment
-    var url;
-    if (window.location.hostname == "localhost") {
-        url = "http://localhost/stana/";
-    } 
-    else if (window.location.hostname == "www.codesword.com") {
-        url = "http://www.codesword.com/stocksta/";
-    }
-    else {
-        url = "http://localhost/stana/";
-    };
-    url = url + "getData.php?company=smc&timerange=3y&chart=adx&dataorg=highchart";
+    dataURL = dynamicDataURL() + "getData.php?company=smc&timerange=3y&chart=adx&dataorg=highchart";
 
-    //$.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=adx&dataorg=highchart', function (data) {
-    $.getJSON(url, function (data) {
+    $.getJSON(dataURL, function (data) {
     	testData = data;
 
         // Create the chart
