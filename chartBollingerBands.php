@@ -6,7 +6,7 @@
 	<script src="https://code.highcharts.com/stock/highstock.js"></script>
     <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
 	<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
-
+    <script src="js/dynamicpath.js"></script>
 </head>
 <body>
 	<div id="container" style="height: 600px; min-width: 310px"></div>
@@ -28,8 +28,8 @@ var testData, testData2;
 
 function plotStock () {
     var company = "<?php echo $company; ?>";
-    //$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=aapl-c.json&callback=?', function (data) {
-    $.getJSON('http://localhost/stana/getData.php?company='+company+'&timerange=3y&chart=bollinger&dataorg=highchart', function (data) {
+    dataURL = dynamicDataURL() + 'getData.php?company='+company+'&timerange=3y&chart=bollinger&dataorg=highchart';
+    $.getJSON(dataURL, function (data) {
     	testData = data;
 
         // split the data set into sma, bollinger upper band, bollinger lower band

@@ -5,7 +5,7 @@
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://code.highcharts.com/stock/highstock.js"></script>
 	<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
-
+    <script src="js/dynamicpath.js"></script>
 </head>
 <body>
 	<div id="container" style="height: 600px; min-width: 310px"></div>
@@ -27,7 +27,8 @@ var testData, testData2;
 
 function plotStock () {
     var company = "<?php echo $company; ?>";
-    $.getJSON('http://localhost/stana/getData.php?company='+company+'&timerange=3y&chart=bbw&dataorg=highchart', function (data) {
+    dataURL = dynamicDataURL() + 'getData.php?company='+company+'&timerange=3y&chart=bbw&dataorg=highchart';
+    $.getJSON(dataURL, function (data) {
     	testData = data;
 
         // Create the chart
