@@ -12,7 +12,7 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/highstock.js"></script>
     <script src="js/exporting.js"></script>
-
+    <script src="js/dynamicpath.js"></script>
 </head>
 <body>
 	<div id="container" style="height: 600px; min-width: 310px"></div>
@@ -34,8 +34,8 @@ var testData, testData2;
 
 function plotStock () {
     var company = "<?php echo $company; ?>";
-    //$.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=smac&dataorg=highchart&ensig=true', function (data) {
-    $.getJSON('http://localhost/stana/getData.php?company='+company+'&timerange=3y&chart=smac&dataorg=highchart&ensig=true', function (data) {    
+    dataURL = dynamicDataURL() + "getData.php?company="+company+"&timerange=3y&chart=smac&dataorg=highchart&ensig=true";
+    $.getJSON(dataURL, function (data) {   
     	testData = data;
         var chartValues = data[0];
 

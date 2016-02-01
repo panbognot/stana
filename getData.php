@@ -6,6 +6,7 @@
 	require_once('dataStochasticOscillator.php');
 	require_once('dataOBV.php');
 	require_once('dataSMA.php');
+	require_once('dataEMA.php');
 	require_once('dataTR.php');
 	require_once('dataADX.php');
 	require_once('dataBollinger.php');
@@ -210,6 +211,28 @@
 				if(isset($_GET['period'])) {
 					$period = $_GET['period'];
 					getSMA($company, $fromDate, $toDate, $dataorg, $period, $ensig,
+						true,
+						$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+				}
+				else {
+					echo "Error: No period selected";
+				}
+				break;
+			case 'ema':
+				if(isset($_GET['period'])) {
+					$period = $_GET['period'];
+					getEMA($company, $fromDate, $toDate, $dataorg, $period, $ensig,
+						true,
+						$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+				}
+				else {
+					echo "Error: No period selected";
+				}
+				break;
+			case 'wema':
+				if(isset($_GET['period'])) {
+					$period = $_GET['period'];
+					getWEMA($company, $fromDate, $toDate, $dataorg, $period, $ensig,
 						true,
 						$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				}

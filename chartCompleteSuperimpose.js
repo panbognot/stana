@@ -30,6 +30,8 @@ var typeCharts = [
                     {chart: 'sma50', indicatorType: 'price', type: 'spline', pos: -1},
                     {chart: 'sma120', indicatorType: 'price', type: 'spline', pos: -1},
                     {chart: 'sma150', indicatorType: 'price', type: 'spline', pos: -1},
+                    {chart: 'ema8', indicatorType: 'price', type: 'spline', pos: -1},
+                    {chart: 'wema8', indicatorType: 'price', type: 'spline', pos: -1},
                     {chart: 'stochastic', indicatorType: 'oscillator', type: 'spline', pos: -1},
                     {chart: 'volume', indicatorType: 'volume', type: 'column', pos: -1}
                 ];
@@ -409,6 +411,16 @@ function plotStock (quote) {
                     else{
                         ctr += 1;
                     }
+                    break;
+                case 'ema8':
+                    getEMAOnly (stockQuote, ctr, 8);
+                    typeCharts[i].pos = ctr;
+                    ctr += 1;
+                    break;
+                case 'wema8':
+                    getWEMAOnly (stockQuote, ctr, 8);
+                    typeCharts[i].pos = ctr;
+                    ctr += 1;
                     break;
                 case 'stochastic':
                     getStochasticOnly (stockQuote, ctr);
@@ -910,6 +922,156 @@ function getSMAOnly (quote, seriesNum, period) {
 
             seriesCounter += 1;
         }
+
+        if(seriesCounter === chartTotalToPlot){
+            createChart(quote);
+        }
+    });
+}
+
+// Get the EMA
+function getEMAOnly (quote, seriesNum, period) {
+    ajaxDoneLoading = false;
+    var link = dynamicDataURL() + 'getData.php?company='+quote+
+                '&timerange=10y&chart=ema&period='+period+
+                '&dataorg=highchart';
+
+    $.getJSON(link, function (data) {
+        ajaxDoneLoading = true;
+
+        // do some kind of pre processing if needed
+        //return data;
+        var ema = data[0];
+
+        seriesOptions[seriesNum] = {
+                name : 'EMA ' + period,
+                id : 'emaSignal' + period,
+                data : ema,
+                yAxis: yAxisPositions.price,
+                tooltip: {
+                    valueDecimals: 2
+                }
+            };
+
+        seriesCounter += 1;
+
+                    
+/*        if (showBuySellSignals) {
+            // split the data set into macd, signal and divergence
+            var signals = [],
+                temp = data[1],
+                dataLength = temp.length,
+                i = 0;
+
+            var tempTS, tempTitle, tempFillColor;
+
+            for (i=0; i < dataLength; i += 1) {
+                tempTS = temp[i][0];
+                tempTitle = temp[i][1];
+
+                if (tempTitle == "buy") {
+                    tempFillColor = "yellowgreen";
+                }
+                else if(tempTitle == "sell"){
+                    tempFillColor = "red";
+                }
+
+                signals[i] = {x: tempTS, title: tempTitle, fillColor: tempFillColor};
+            }
+
+            seriesOptions[seriesNum + 1] = {
+                    type : 'flags',
+                    data : signals,
+                    onSeries: 'emaSignal' + period,
+                    shape: 'squarepin',
+                    width: 16,
+                    style: { // text style
+                        color: 'white'
+                    },
+                    states: {
+                        hover: {
+                            fillColor: '#yellowgreen' // darker
+                        }
+                    }
+                };
+
+            seriesCounter += 1;
+        }*/
+
+        if(seriesCounter === chartTotalToPlot){
+            createChart(quote);
+        }
+    });
+}
+
+// Get the WEMA
+function getWEMAOnly (quote, seriesNum, period) {
+    ajaxDoneLoading = false;
+    var link = dynamicDataURL() + 'getData.php?company='+quote+
+                '&timerange=10y&chart=wema&period='+period+
+                '&dataorg=highchart';
+
+    $.getJSON(link, function (data) {
+        ajaxDoneLoading = true;
+
+        // do some kind of pre processing if needed
+        //return data;
+        var wema = data[0];
+
+        seriesOptions[seriesNum] = {
+                name : 'WEMA ' + period,
+                id : 'wemaSignal' + period,
+                data : wema,
+                yAxis: yAxisPositions.price,
+                tooltip: {
+                    valueDecimals: 2
+                }
+            };
+
+        seriesCounter += 1;
+
+                    
+/*        if (showBuySellSignals) {
+            // split the data set into macd, signal and divergence
+            var signals = [],
+                temp = data[1],
+                dataLength = temp.length,
+                i = 0;
+
+            var tempTS, tempTitle, tempFillColor;
+
+            for (i=0; i < dataLength; i += 1) {
+                tempTS = temp[i][0];
+                tempTitle = temp[i][1];
+
+                if (tempTitle == "buy") {
+                    tempFillColor = "yellowgreen";
+                }
+                else if(tempTitle == "sell"){
+                    tempFillColor = "red";
+                }
+
+                signals[i] = {x: tempTS, title: tempTitle, fillColor: tempFillColor};
+            }
+
+            seriesOptions[seriesNum + 1] = {
+                    type : 'flags',
+                    data : signals,
+                    onSeries: 'wemaSignal' + period,
+                    shape: 'squarepin',
+                    width: 16,
+                    style: { // text style
+                        color: 'white'
+                    },
+                    states: {
+                        hover: {
+                            fillColor: '#yellowgreen' // darker
+                        }
+                    }
+                };
+
+            seriesCounter += 1;
+        }*/
 
         if(seriesCounter === chartTotalToPlot){
             createChart(quote);

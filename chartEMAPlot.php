@@ -31,7 +31,7 @@ var testData, testData2;
 
 function plotStock () {
     var company = "<?php echo $company; ?>";
-    dataURL = dynamicDataURL() + "getData.php?company="+company+"&timerange=3y&chart=sma&period=50&dataorg=highchart";
+    dataURL = dynamicDataURL() + "getData.php?company="+company+"&timerange=3y&chart=ema&period=8&dataorg=highchart";
     $.getJSON(dataURL, function (data) { 
     //$.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=sma&period=50&dataorg=highchart', function (data) {
     	testData = data;

@@ -29,7 +29,6 @@ function plotStock() {
     var company = "<?php echo $company; ?>";
     dataURL = dynamicDataURL() + "getData.php?company="+company+"&timerange=3y&chart=obv&dataorg=highchart";
     $.getJSON(dataURL, function (data) {
-    //$.getJSON('http://localhost/stana/getData.php?company=smc&timerange=3y&chart=obv&dataorg=highchart', function (data) {
         testData = data;
 
         // split the data set into close, volume, obv

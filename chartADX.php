@@ -38,7 +38,7 @@ function plotStock () {
             },
 
             title : {
-                text : 'ADX Plot'
+                text : company.toUpperCase() + ' ADX Plot'
             },
 
             yAxis : {
