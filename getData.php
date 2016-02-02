@@ -191,6 +191,10 @@
 				getOHLC($company, $fromDate, $toDate, $dataorg, 
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				break;
+			case 'ohlcha':
+				getOHLCHA($company, $fromDate, $toDate, $dataorg, 
+					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+				break;
 			case 'macd':
 				getMACD($company, $fromDate, $toDate, $dataorg, 
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);

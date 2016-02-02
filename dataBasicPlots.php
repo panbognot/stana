@@ -1,4 +1,6 @@
 <?php 
+	require_once("codesword_ha.php");	//for the heikin-ashi candlestick
+
 	// search for the list of companies
 	function searchForCompany ($keyword, $host, $db, $user, $pass) {
 		// Create connection
@@ -240,4 +242,90 @@
 
 	   mysqli_close($con);
 	}
+
+	// returns OHLC for a heikin-ashi candlestick chart
+	function getOHLCHA ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
+		// Create connection
+		$con=mysqli_connect($host, $user, $pass, $db);
+		
+		// Check connection
+		if (mysqli_connect_errno()) {
+		  echo "Failed to connect to MySQL: " . mysqli_connect_error();
+		  return;
+		}
+
+		if ($dataorg == "highchart") {
+			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT (+8:00)
+			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, 
+					open, high, low, close, volume 
+					FROM $company 
+					WHERE timestamp >= '".$from."' AND timestamp <= '".$to."' ORDER BY timestamp ASC";
+		} else {
+			$sql = "SELECT DATE_FORMAT(timestamp, '%Y-%m-%d') as timestamp, open, high, low, close, volume 
+					FROM $company 
+					WHERE timestamp >= '".$from."' AND timestamp <= '".$to."' ORDER BY timestamp ASC";
+		}
+
+		$result = mysqli_query($con, $sql);
+
+		$dbreturn = "";
+		$ctr = 0;
+		$temp;
+		while($row = mysqli_fetch_array($result)) {
+			if ($dataorg == "json") {
+			  	$dbreturn[$ctr][0] = $row['timestamp'];
+			  	$dbreturn[$ctr][1] = floatval($row['open']);
+			  	$dbreturn[$ctr][2] = floatval($row['high']);
+			  	$dbreturn[$ctr][3] = floatval($row['low']);
+			  	$dbreturn[$ctr][4] = floatval($row['close']);
+			  	$dbreturn[$ctr][5] = floatval($row['volume']);
+			} 
+			elseif ($dataorg == "highchart") {
+			  	if ($ctr == 0) {
+			  		//echo "[";
+			  	}
+			  	//echo "[".$row['timestamp'].",".$row['open'].",".$row['high'].",".$row['low'].",".$row['close'].",".$row['volume']."],";
+			  	$dbreturn[$ctr][0] = doubleval($row['timestamp']);
+			  	$dbreturn[$ctr][1] = floatval($row['open']);
+			  	$dbreturn[$ctr][2] = floatval($row['high']);
+			  	$dbreturn[$ctr][3] = floatval($row['low']);
+			  	$dbreturn[$ctr][4] = floatval($row['close']);
+			  	$dbreturn[$ctr][5] = floatval($row['volume']);
+			}
+			elseif ($dataorg == "array") {
+				//TODO: create code for organizing an array data output
+			}
+			else {
+				$dbreturn[$ctr]['timestamp'] = $row['timestamp'];
+				$dbreturn[$ctr]['open'] = floatval($row['open']);
+				$dbreturn[$ctr]['high'] = floatval($row['high']);
+				$dbreturn[$ctr]['low'] = floatval($row['low']);
+				$dbreturn[$ctr]['close'] = floatval($row['close']);
+				$dbreturn[$ctr]['volume'] = floatval($row['volume']);
+			}
+
+			$ctr = $ctr + 1;
+		}
+
+		//echo "ohlc regular: ".json_encode($dbreturn)."<Br><Br>";
+
+		//Apply the heikin-ashi conversion
+		$ohlcha = codesword_ha($dbreturn);
+
+		if ($dataorg == "json") {
+			echo json_encode( $ohlcha );
+		} 
+		elseif ($dataorg == "highchart") {
+			//echo "[".$temp[0].",".$temp[1].",".$temp[2].",".$temp[3].",".$temp[4].",".$temp[5]."]]";
+			echo json_encode( $ohlcha );
+		}
+		elseif ($dataorg == "array") {
+		//TODO: create code for organizing an array data output
+		}
+		else { //json
+			echo json_encode( $ohlcha );
+		}
+
+	   mysqli_close($con);
+	}	
 ?>
