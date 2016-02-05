@@ -269,6 +269,10 @@
 				getBollingerBands($company, $fromDate, $toDate, $dataorg, 
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				break;
+			case 'bollinger2':
+				getBollingerBands2($company, $fromDate, $toDate, $dataorg, 
+					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+				break;
 			case 'bbw':
 				getBBW($company, $fromDate, $toDate, $dataorg, 
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
