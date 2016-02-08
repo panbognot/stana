@@ -60,6 +60,47 @@
 		return $bollingerBands;
 	}
 
+	// This function computes the bollinger bands of the stock
+	// Real - data of which structure is [timestamp,open,high,low,close]
+	// Returns - data with structure [timestamp,open,high,low,close,
+	//									sma,upper band sd 1, lower band sd 1,
+	//									upper band sd 2, lower band sd 2]
+	function codesword_bollinger_bands3($real, $period=20) {
+		$bollingerBands = [];
+
+		//compute the simple moving average and the standard deviation
+		$std_dev = codesword_sd_ohlc($real, $period);
+		//return $std_dev;
+
+		$ctr = 0;
+		foreach ($std_dev as $sd) {
+			//get the timestamp
+			$bollingerBands[$ctr][0] = $sd[0];
+			//get the open
+			$bollingerBands[$ctr][1] = $real[$ctr][1];
+			//get the get the high
+			$bollingerBands[$ctr][2] = $real[$ctr][2];
+			//get the low
+			$bollingerBands[$ctr][3] = $real[$ctr][3];
+			//get the close
+			$bollingerBands[$ctr][4] = $real[$ctr][4];
+			//get the sma
+			$bollingerBands[$ctr][5] = $sd[1];
+			//calculate the bollinger upper band (sd1)
+			$bollingerBands[$ctr][6] = $sd[1] + ($sd[2]);
+			//calculate the bollinger lower band (sd1)
+			$bollingerBands[$ctr][7] = $sd[1] - ($sd[2]);
+			//calculate the bollinger upper band (sd2)
+			$bollingerBands[$ctr][8] = $sd[1] + ($sd[2] * 2);
+			//calculate the bollinger lower band (sd2)
+			$bollingerBands[$ctr][9] = $sd[1] - ($sd[2] * 2);
+
+			$ctr++;
+		}
+
+		return $bollingerBands;
+	}	
+
 	// This function computes the bollinger bands width of the stock
 	// Real - data of which structure is [timestamp, close]
 	// Returns - data with structure [timestamp,bbw]
