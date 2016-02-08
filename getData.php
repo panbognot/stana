@@ -275,6 +275,7 @@
 				break;
 			case 'bollinger3':
 				getBollingerBands3($company, $fromDate, $toDate, $dataorg, 
+					$ensig, 
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				break;
 			case 'bbw':

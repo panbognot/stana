@@ -145,7 +145,8 @@
 
 	// returns Bollinger Bands Data (timestamp, open, high, low, close, 
 	//								ubb sd1, lbb sd1, ubb sd2, lbb sd2)
-	function getBollingerBands3 ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", 
+	function getBollingerBands3 ($company, $from="1900-01-01 00:00:00", $to=null, 
+								$dataorg="json", $enSignals=false,
 								$host, $db, $user, $pass) {
 		// Create connection
 		$con=mysqli_connect($host, $user, $pass, $db);
@@ -217,18 +218,18 @@
 			$ctrBB = 0;
 			foreach ($bbohlc as $bb) {
 				$returnBB[$ctrBB]['timestamp'] = $bb[0];
-				$returnBB[$ctrBB]['timestamp'] = $bb[0];
-				$returnBB[$ctrBB]['timestamp'] = $bb[0];
-				$returnBB[$ctrBB]['timestamp'] = $bb[0];
-				$returnBB[$ctrBB]['timestamp'] = $bb[0];
+				$returnBB[$ctrBB]['open'] = $bb[1];
+				$returnBB[$ctrBB]['high'] = $bb[2];
+				$returnBB[$ctrBB]['low'] = $bb[3];
+				$returnBB[$ctrBB]['close'] = $bb[4];
 
-				$returnBB[$ctrBB]['timestamp'] = $bb[0];
+				$returnBB[$ctrBB]['sma'] = $bb[5];
 
-				$returnBB[$ctrBB]['timestamp'] = $bb[0];
-				$returnBB[$ctrBB]['timestamp'] = $bb[0];
+				$returnBB[$ctrBB]['ubb1'] = $bb[6];
+				$returnBB[$ctrBB]['lbb1'] = $bb[7];
 
-				$returnBB[$ctrBB]['timestamp'] = $bb[0];
-				$returnBB[$ctrBB]['timestamp'] = $bb[0];
+				$returnBB[$ctrBB]['ubb2'] = $bb[8];
+				$returnBB[$ctrBB]['lbb2'] = $bb[9];
 			}
 		} 
 		elseif ($dataorg == "highchart") {
@@ -241,7 +242,17 @@
 			$returnBB = codesword_bollinger_bands3($dbreturn, $studyPeriod);
 		}
 
-		echo json_encode($returnBB);
+		$allData = [];
+
+		if ($enSignals) {
+			$allData[0] = $returnBB;
+			$allData[1] = codesword_bbTrendDetector($returnBB);
+		} 
+		else {
+			$allData = $returnBB;
+		}
+
+		echo json_encode($allData);
 		mysqli_close($con);
 	}
 
