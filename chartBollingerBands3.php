@@ -40,7 +40,8 @@ function plotStock () {
         // split the data set into sma, bollinger upper band, bollinger lower band
         var sma = [],
             ohlc = [],
-            
+            signals = [];
+
             bollingerBandsSD1 = [],
             bollingerBandsSD2 = [],
             dataLength = prices.length,
@@ -82,9 +83,28 @@ function plotStock () {
             ]);
         }
 
+        var tradeSignals = [];
+        var tempTS, tempTitle, tempFillColor;
         for (var j = 0; j < signalsData.length; j += 1) {
+            tempTS = signalsData[j][0];
+            tempTitle = signalsData[j][1];
 
+            if (tempTitle == "buy") {
+                tempFillColor = "yellowgreen";
+            }
+            else if(tempTitle == "sell"){
+                tempFillColor = "red";
+            }
+
+            tradeSignals[j] = {x: tempTS, title: tempTitle, fillColor: tempFillColor};
+
+/*            signals.push([
+                signalsData[j][0],  // the date
+                signalsData[j][1],  // the signal
+                signalsData[j][2],  // the description
+            ]);*/
         }
+        testData2 = tradeSignals;
 
         // Create the chart
         $('#container').highcharts('StockChart', {
@@ -128,7 +148,23 @@ function plotStock () {
             {
                 type: 'candlestick',
                 name: 'Candlestick',
+                id : "candlestick",
                 data: ohlc
+            },
+            {
+                type : 'flags',
+                data : tradeSignals,
+                onSeries: "candlestick",
+                shape: 'squarepin',
+                width: 16,
+                style: { // text style
+                    color: 'white'
+                },
+                states: {
+                    hover: {
+                        fillColor: '#yellowgreen' // darker
+                    }
+                }
             }]
         });
     });
