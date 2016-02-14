@@ -133,6 +133,10 @@
 		$upperSD2 = [];
 		$lowerSD2 = [];
 
+		$curCash = 100000;
+		$curStocks = 0;
+		$curEquity = 0;
+
 		//fill the variables
 		//this step is used to avoid confusion with variables
 		//when comparing values over a small period of time for
@@ -153,7 +157,7 @@
 			//echo $sma[$i].", ".$upperSD1[$i].", ".$lowerSD1[$i].", ".$upperSD2[$i].", ".$lowerSD2[$i]."<Br>";
 		}
 
-		for ($i=2; $i < count($input); $i++) { 
+		for ($i=1; $i < count($input); $i++) { 
 			//Up Trend Detector
 			if ($close[$i] > $upperSD1[$i]) {
 				$continuity = 1;
@@ -161,34 +165,89 @@
 				if ($close[$i-1] > $upperSD1[$i-1]) {
 					$continuity++;
 				}
-				if ($close[$i-2] > $upperSD1[$i-2]) {
-					$continuity++;
-				}
 
-				if ($continuity == 3) {
-					//Todo: add some slope calculator to filter false buy signals
+				if ($continuity == 2) {
+					//Buy candidate only if slope is greater than 2.0
+					$slope = (($sma[$i] - $sma[$i-1]) / 2) * (1000 / $sma[$i-1]);
 
-					if ( ($ctr > 0) && ($signals[$ctr-1][1] == "sell") ) {
-						$signals[$ctr][0] = $timestamp[$i];
-						$signals[$ctr][1] = "buy";
-						$signals[$ctr][2] = "description";
-						$ctr++;
-					}
-					elseif ($ctr == 0) {
-						$signals[$ctr][0] = $timestamp[$i];
-						$signals[$ctr][1] = "buy";
-						$signals[$ctr][2] = "description";
-						$ctr++;
+					if ($slope >= 2.0) {
+						if ( ($ctr > 0) && ($signals[$ctr-1][1] == "sell") ) {
+							$signals[$ctr][0] = $timestamp[$i];
+							$signals[$ctr][1] = "buy";
+							$signals[$ctr][2] = $slope;
+
+							//trade price = price of stock when it was bought/sold
+							$signals[$ctr][3] = $close[$i];
+
+							$ctr++;
+						}
+						elseif ($ctr == 0) {
+							$signals[$ctr][0] = $timestamp[$i];
+							$signals[$ctr][1] = "buy";
+							$signals[$ctr][2] = $slope;
+
+							//trade price = price of stock when it was bought/sold
+							$signals[$ctr][3] = $close[$i];
+
+							$ctr++;
+						}
+
+						continue;
 					}
 				}
 			}
-			elseif ($close[$i] < $lowerSD1[$i]) {
+
+			//Uptrend detector
+			//there has to be at least 4 samples
+			if ( ($i > 3) && ($close[$i] > $upperSD1[$i]) ) {
 				$continuity = 1;
 
-				if ($close[$i-1] < $lowerSD1[$i-1]) {
+				for ($j=1; $j < 4; $j++) { 
+					if ($close[$i-$j] > $upperSD1[$i-$j]) {
+						$continuity++;
+					}
+				}
+
+				if ($continuity == 4) {
+					//Buy candidate only if slope is greater than 1.5
+					//timeline under observation is 4 days
+					$slope = (($sma[$i] - $sma[$i-3]) / 4) * (1000 / $sma[$i-3]);
+
+					if ($slope >= 1.5) {
+						if ( ($ctr > 0) && ($signals[$ctr-1][1] == "sell") ) {
+							$signals[$ctr][0] = $timestamp[$i];
+							$signals[$ctr][1] = "buy";
+							$signals[$ctr][2] = $slope;
+
+							//trade price = price of stock when it was bought/sold
+							$signals[$ctr][3] = $close[$i];
+
+							$ctr++;
+						}
+						elseif ($ctr == 0) {
+							$signals[$ctr][0] = $timestamp[$i];
+							$signals[$ctr][1] = "buy";
+							$signals[$ctr][2] = $slope;
+
+							//trade price = price of stock when it was bought/sold
+							$signals[$ctr][3] = $close[$i];
+
+							$ctr++;
+						}
+
+						continue;
+					}
+				}
+			}
+			
+			//down trend
+			if ( ($i > 3) && $close[$i] < $upperSD1[$i]) {
+				$continuity = 1;
+
+				if ($close[$i-1] < $upperSD1[$i-1]) {
 					$continuity++;
 				}
-				if ($close[$i-2] < $lowerSD1[$i-2]) {
+				if ($close[$i-2] < $upperSD1[$i-2]) {
 					$continuity++;
 				}
 
@@ -198,19 +257,121 @@
 					if ( ($ctr > 0) && ($signals[$ctr-1][1] == "buy") ) {
 						$signals[$ctr][0] = $timestamp[$i];
 						$signals[$ctr][1] = "sell";
-						$signals[$ctr][2] = "description";
+						$signals[$ctr][2] = "two consecutive below sd1";
+
+						//trade price = price of stock when it was bought/sold
+						$signals[$ctr][3] = $close[$i];
+
 						$ctr++;
 					}
 					elseif ($ctr == 0) {
 						$signals[$ctr][0] = $timestamp[$i];
 						$signals[$ctr][1] = "sell";
-						$signals[$ctr][2] = "description";
+						$signals[$ctr][2] = "two consecutive below sd1";
+
+						//trade price = price of stock when it was bought/sold
+						$signals[$ctr][3] = $close[$i];
+
 						$ctr++;
 					}
+
+					continue;
 				}
 			}
-			else {
-				# code...
+
+			//down trend
+			if ( ($close[$i] > $sma[$i]) && ($open[$i] > $sma[$i]) &&
+				($open[$i] - $close[$i] > 0) ) {
+
+				$bodyAboveSD1 = $open[$i] - $upperSD1[$i];
+				$bodyBelowSD1 = $upperSD1[$i] - $close[$i];
+
+				$candleLength = $open[$i] - $close[$i];
+
+				//sell if body is significantly below the SD1
+				if ($bodyBelowSD1 > $bodyAboveSD1) {
+					//Todo: add some slope calculator to filter false buy signals
+
+					if ( ($ctr > 0) && ($signals[$ctr-1][1] == "buy") ) {
+						$signals[$ctr][0] = $timestamp[$i];
+						$signals[$ctr][1] = "sell";
+						$signals[$ctr][2] = "body is significantly below the SD1";
+
+						//trade price = price of stock when it was bought/sold
+						$signals[$ctr][3] = $close[$i];
+
+						$ctr++;
+					}
+					elseif ($ctr == 0) {
+						$signals[$ctr][0] = $timestamp[$i];
+						$signals[$ctr][1] = "sell";
+						$signals[$ctr][2] = "body is significantly below the SD1";
+
+						//trade price = price of stock when it was bought/sold
+						$signals[$ctr][3] = $close[$i];
+
+						$ctr++;
+					}
+
+					continue;
+				}
+			}
+
+			//down trend
+			if ($close[$i] < $sma[$i]) {
+				//Sell candidate only if slope is less than 0
+				//$slope = (($sma[$i] - $sma[$i-1]) / 2) * (1000 / $sma[$i-1]);
+
+				//if ($slope < 0) {
+					if ( ($ctr > 0) && ($signals[$ctr-1][1] == "buy") ) {
+						$signals[$ctr][0] = $timestamp[$i];
+						$signals[$ctr][1] = "sell";
+						$signals[$ctr][2] = "strong";
+
+						//trade price = price of stock when it was bought/sold
+						$signals[$ctr][3] = $close[$i];
+
+						$ctr++;
+					}
+					elseif ($ctr == 0) {
+						$signals[$ctr][0] = $timestamp[$i];
+						$signals[$ctr][1] = "sell";
+						$signals[$ctr][2] = "strong";
+
+						//trade price = price of stock when it was bought/sold
+						$signals[$ctr][3] = $close[$i];
+
+						$ctr++;
+					}
+
+					continue;
+				//}
+			}
+
+		}
+
+		//calculate the gains for the trades
+		for ($k=0; $k < count($signals); $k++) { 
+			if ($signals[$k][1] == "sell") {
+				if ($k == 0) {
+					//gain is zero
+					$signals[$k][4] = 0;
+				} 
+				else {
+					//gain = sell price - buying price + prev gain
+					$signals[$k][4] = $signals[$k][3] - $signals[$k-1][3] + $signals[$k-1][4];
+				}
+				
+			} 
+			elseif ($signals[$k][1] == "buy") {
+				if ( ($k == 0) || ($k == 1) ) {
+					//gain is zero
+					$signals[$k][4] = 0;
+				} 
+				elseif ($k > 0) {
+					//gain is prev gain
+					$signals[$k][4] = $signals[$k-1][4];
+				}
 			}
 			
 		}

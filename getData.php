@@ -43,6 +43,10 @@
 		        debug_print("1 month");
 		        $deltaTime = "1 month";
 		        break;
+		    case "2m":
+		        debug_print("2 months");
+		        $deltaTime = "2 months";
+		        break; 
 		    case "3m":
 		        debug_print("3 months");
 		        $deltaTime = "3 months";
