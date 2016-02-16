@@ -167,7 +167,12 @@
 
 		if ($ensig == "true") {
 			$ensig = true;
-		} else {
+		}
+		elseif ($ensig == "latest") {
+			//get the latest buy/sell signal only
+			$ensig = "latest";
+		}
+		else {
 			$ensig = false;
 		}
 

@@ -1,6 +1,32 @@
 <?php 
 	require_once("codesword_ha.php");	//for the heikin-ashi candlestick
 
+	// generate the names of all the companies
+	function readStockQuotes ($host, $db, $user, $pass) {
+		// Create connection
+		$con=mysqli_connect($host, $user, $pass, $db);
+		
+		// Check connection
+		if (mysqli_connect_errno()) {
+		  echo "Failed to connect to MySQL: " . mysqli_connect_error();
+		  return;
+		}
+
+		$sql = "SELECT DISTINCT quote FROM stock_quotes ORDER BY quote ASC";
+		$result = mysqli_query($con, $sql);
+
+		$dbreturn = "";
+		$ctr = 0;
+		while($row = mysqli_fetch_array($result)) {
+			$dbreturn[$ctr++] = $row['quote'];
+		}
+		//echo json_encode( $dbreturn );
+
+		mysqli_close($con);
+
+		return $dbreturn;
+	}
+
 	// search for the list of companies
 	function searchForCompany ($keyword, $host, $db, $user, $pass) {
 		// Create connection

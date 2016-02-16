@@ -257,7 +257,15 @@
 				$smaConsolidated[$i][2] = -1;
 			}
 			elseif ($i > $diffShort) {
-			 	$smaConsolidated[$i][2] = $smaShort[$i - $diffShort][1];
+				if (!isset($smaShort[$i - $diffShort][1])) {
+				   $smaConsolidated[$i][2] =  null;
+
+				   //this stock has low volatility and therefore not desirable for trading
+				   //echo "stock has low volatility<Br>";
+				   return 0;
+				}
+
+				$smaConsolidated[$i][2] = $smaShort[$i - $diffShort][1];
 			}
 
 			//pad the smaShort with -1 for the null values
@@ -266,7 +274,15 @@
 				$smaConsolidated[$i][3] = -1;
 			}
 			elseif ($i > $diffMedium) {
-			 	$smaConsolidated[$i][3] = $smaMedium[$i - $diffMedium][1];
+			 	if (!isset($smaMedium[$i - $diffMedium][1])) {
+				   $smaConsolidated[$i][3] =  null;
+
+				   //this stock has low volatility and therefore not desirable for trading
+				   //echo "stock has low volatility<Br>";
+				   return 0;
+				}
+
+				$smaConsolidated[$i][3] = $smaMedium[$i - $diffMedium][1];
 			}
 
 			//pad the smaShort with -1 for the null values
@@ -275,7 +291,15 @@
 				$smaConsolidated[$i][4] = -1;
 			}
 			elseif ($i > $diffLong) {
-			 	$smaConsolidated[$i][4] = $smaLong[$i - $diffLong][1];
+			 	if (!isset($smaLong[$i - $diffLong][1])) {
+				   $smaConsolidated[$i][4] =  null;
+
+				   //this stock has low volatility and therefore not desirable for trading
+				   //echo "stock has low volatility<Br>";
+				   return 0;
+				}
+
+				$smaConsolidated[$i][4] = $smaLong[$i - $diffLong][1];
 			}
 		}
 
@@ -308,6 +332,11 @@
 	function codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong, $dataorg="json") {
 		$smaConsolidated = codesword_smaConsolidate($real, $smaShort, $smaMedium, $smaLong);
 		$tradeSignals = [];
+
+		if ($smaConsolidated == 0) {
+			//echo "codesword_smaBuySellSignalCombined: stock has low chance of being traded<Br>";
+			return 0;
+		}
 
 		$ctr = 0;
 
@@ -555,5 +584,16 @@
 		$allData[1] = $tradeSignals;
 
 		return $allData;
+	}
+
+	// Returns the latest trade signal
+	// Returns - [timestamp, close, short, comment]
+	function codesword_smaBuySellSignalCombinedLatests($real, $smaShort, $smaMedium, $smaLong, $dataorg="json") {
+		$smac = codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong, $dataorg);
+		$signals = $smac[1];
+
+		return $signals[count($signals) - 1];
+
+		// return $smac[1];
 	}
 ?>

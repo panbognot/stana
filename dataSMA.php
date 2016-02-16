@@ -33,6 +33,11 @@
 		$temp;
 		$arrayTS;
 		$arrayClose;
+
+		if (mysqli_num_rows($result) <= 0) {
+			return 0;
+		}		
+
 		while($row = mysqli_fetch_array($result)) {
 			if ($dataorg == "json") {
 			  	$dbreturn[$ctr][0] = $arrayTS[$ctr] = $row['timestamp'];
@@ -81,7 +86,8 @@
 
 		if ($enSignals) {
 			$buysellSignals = codesword_smaBuySellSignal($dbreturn, $sma);
-		} else {
+		} 
+		else {
 			$buysellSignals = 0;
 		}
 		
@@ -116,20 +122,29 @@
 					$dataorg, $periodShort, $enSignals,
 					$host, $db, $user, $pass);
 
-		//$smaCombined = codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong);
-
-		//echo json_encode($smaCombined);
+		if ( ($smaShort == 0) || ($smaMedium == 0) || ($smaLong == 0) || ($real == 0) ) {
+			return 0;
+		}
 
 		$allData = [];
 
-		if ($enSignals) {
+		if ($enSignals == "latest") {
+			//TODO: return only the latest signal
+			// [timestamp,trade signal]
+			$lastSignal = codesword_smaBuySellSignalCombinedLatests($real, $smaShort, $smaMedium, $smaLong, $dataorg);
+			return $lastSignal;
+			//echo json_encode($lastSignal);
+		}
+		elseif ($enSignals) {
 			$allData = codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong, $dataorg);
+			echo json_encode($allData);
 		} 
 		else {
 			$allData[0] = codesword_smaConsolidate($real, $smaShort, $smaMedium, $smaLong);
 			$allData[1] = 0;
+			echo json_encode($allData);
 		}
 
-		echo json_encode($allData);
+		
 	}
 ?>
