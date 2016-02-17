@@ -20,11 +20,9 @@
 		global $toDate, $fromDate;
 
 		$toDate = date_create(date("Y-m-d"));
-		//debug_print("to date: " . date_format($toDate,"Y-m-d") . "<Br>");
 
 		$fromDate = date_create(date("Y-m-d"));
 		date_sub($fromDate, date_interval_create_from_date_string($deltaTime));
-		//debug_print("<Br>from date: " . date_format($fromDate,"Y-m-d") . "<Br>");
 
 		$fromDate = date_format($fromDate,"Y-m-d");
 		$toDate = date_format($toDate,"Y-m-d");
@@ -37,8 +35,6 @@
 
 		return floor($datediff/(60*60*24));
 	}
-
-	//getDateDiffFromPresent("2016-01-01");
 
 	//get the time range
 	getTimeRange($delta);
@@ -64,7 +60,7 @@
 
 	//echo json_encode($latestSignals);
 
-	//filter out dates that aren't within 1 month's time
+	//filter out dates that aren't within the target time window
 	$curMonthSignals = [];
 	$ctr = 0;
 	foreach ($latestSignals as $signal) {

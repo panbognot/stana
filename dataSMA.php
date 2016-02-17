@@ -127,13 +127,11 @@
 		}
 
 		$allData = [];
-
-		if ($enSignals == "latest") {
-			//TODO: return only the latest signal
+		if (strcasecmp($enSignals, "latest") == 0) {
+			//return only the latest signal
 			// [timestamp,trade signal]
 			$lastSignal = codesword_smaBuySellSignalCombinedLatests($real, $smaShort, $smaMedium, $smaLong, $dataorg);
 			return $lastSignal;
-			//echo json_encode($lastSignal);
 		}
 		elseif ($enSignals) {
 			$allData = codesword_smaBuySellSignalCombined($real, $smaShort, $smaMedium, $smaLong, $dataorg);
