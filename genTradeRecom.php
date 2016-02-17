@@ -10,6 +10,26 @@
 		$days = 5;
 	}
 
+	if(isset($_GET['type'])) {
+		$type = $_GET['type'];
+
+		switch ($type) {
+		    case "smac":
+		        echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
+		        break;
+		    case "bb3":
+		        echo "BOLLINGER BANDS 3 <Br><Br>";
+		        break;
+		    default:
+		        $type = "smac";
+		        echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
+		}
+	}
+	else {
+		echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
+		$type = "smac";
+	}
+
 	$toDate;
 	$fromDate;
 	$dataorg = "json";
@@ -46,9 +66,20 @@
 	$latestSignals = [];
 	$ctr = 0;
 	foreach ($companyList as $company) {
-		$latest = getSMACombined($company, $fromDate, $toDate, $dataorg, 
-			20, 50, 120, $ensig, 
-			$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+		switch ($type) {
+		    case "smac":
+				$latest = getSMACombined($company, $fromDate, $toDate, $dataorg, 
+							20, 50, 120, $ensig, 
+							$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+		        break;
+		    case "bb3":
+		    	echo "using bollinger bands 3 <Br>";
+		    	return;
+		        break;
+		    default:
+		        echo "Error: No selected Type of Signal Generator <Br><Br>";
+		        return;
+		}
 
 		if ( ($latest == 0) || ($latest == []) ) {
 			continue;
