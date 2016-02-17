@@ -2,6 +2,13 @@
 	require_once('connectDB.php');
 	require_once('dataBasicPlots.php');
 	require_once('dataSMA.php');
+	require_once('dataBollinger.php');
+
+	$toDate;
+	$fromDate;
+	$dataorg = "json";
+	$ensig = "latest";
+	$delta = "1 year";
 
 	if(isset($_GET['days'])) {
 		$days = (int)($_GET['days']);
@@ -19,6 +26,7 @@
 		        break;
 		    case "bb3":
 		        echo "BOLLINGER BANDS 3 <Br><Br>";
+		        $delta = "3 months";
 		        break;
 		    default:
 		        $type = "smac";
@@ -29,12 +37,6 @@
 		echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
 		$type = "smac";
 	}
-
-	$toDate;
-	$fromDate;
-	$dataorg = "json";
-	$ensig = "latest";
-	$delta = "1 year";
 
 	function getTimeRange($deltaTime) {
 		global $toDate, $fromDate;
@@ -73,8 +75,9 @@
 							$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 		        break;
 		    case "bb3":
-		    	echo "using bollinger bands 3 <Br>";
-		    	return;
+		    	$latest = getBollingerBands3($company, $fromDate, $toDate, $dataorg, 
+							$ensig, 
+							$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 		        break;
 		    default:
 		        echo "Error: No selected Type of Signal Generator <Br><Br>";
@@ -118,7 +121,7 @@
 	//Display the Buy Recommendations
 	echo "Buy Signals for the Past $days days :<Br><Br>";
 	foreach ($filteredBuys as $buys) {
-		echo "Company: ".$buys[3].", date: ".$buys[0]."<Br>";
+		echo "Company: ".$buys[count($buys) - 1].", date: ".$buys[0]."<Br>";
 	}
 
 	echo "<Br><Br>";
@@ -126,6 +129,6 @@
 	//Display the Sell Recommendations
 	echo "Sell Signals for the Past month:<Br><Br>";
 	foreach ($filteredSells as $sells) {
-		echo "Company: ".$sells[3].", date: ".$sells[0]."<Br>";
+		echo "Company: ".$sells[count($sells) - 1].", date: ".$sells[0]."<Br>";
 	}
 ?>

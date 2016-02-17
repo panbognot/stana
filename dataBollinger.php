@@ -178,7 +178,7 @@
 		$dbreturn = "";
 		$ctr = 0;
 		$temp;
-		$returnBB;
+		$returnBB = 0;
 		while($row = mysqli_fetch_array($result)) {
 			if ($dataorg == "json") {
 			  	$dbreturn[$ctr][0] = $row['timestamp'];
@@ -208,52 +208,55 @@
 			$ctr = $ctr + 1;
 		}
 
+		//close mysqli
+		mysqli_close($con);
+
 		if ($dataorg == "json") {
 			$bbohlc = codesword_bollinger_bands3($dbreturn, $studyPeriod);
 
-			// Returns - data with structure [timestamp,open,high,low,close,
-			//									sma,upper band sd 1, lower band sd 1,
-			//									upper band sd 2, lower band sd 2]
-
-			$ctrBB = 0;
-			foreach ($bbohlc as $bb) {
-				$returnBB[$ctrBB]['timestamp'] = $bb[0];
-				$returnBB[$ctrBB]['open'] = $bb[1];
-				$returnBB[$ctrBB]['high'] = $bb[2];
-				$returnBB[$ctrBB]['low'] = $bb[3];
-				$returnBB[$ctrBB]['close'] = $bb[4];
-
-				$returnBB[$ctrBB]['sma'] = $bb[5];
-
-				$returnBB[$ctrBB]['ubb1'] = $bb[6];
-				$returnBB[$ctrBB]['lbb1'] = $bb[7];
-
-				$returnBB[$ctrBB]['ubb2'] = $bb[8];
-				$returnBB[$ctrBB]['lbb2'] = $bb[9];
+			if (count($bbohlc) <= 1) {
+				//No Data
+				return 0;
 			}
+
+			$returnBB = $bbohlc;
 		} 
 		elseif ($dataorg == "highchart") {
 			$returnBB = codesword_bollinger_bands3($dbreturn, $studyPeriod);
+
+			if ($returnBB == 0) {
+				//No Data
+				return 0;
+			}
 		}
 		elseif ($dataorg == "array") {
 		//TODO: create code for organizing an array data output
 		}
 		else { //json
 			$returnBB = codesword_bollinger_bands3($dbreturn, $studyPeriod);
+
+			if ($returnBB == 0) {
+				//No Data
+				return 0;
+			}
 		}
 
 		$allData = [];
-
-		if ($enSignals) {
+		if (strcasecmp($enSignals, "latest") == 0) {
+			//return only the latest signal
+			// [timestamp,trade signal,... other info...]
+			$lastSignal = codesword_bbTrendDetectorLatests($returnBB);
+			return $lastSignal;
+		}
+		elseif ($enSignals) {
 			$allData[0] = $returnBB;
 			$allData[1] = codesword_bbTrendDetector($returnBB);
+			echo json_encode($allData);
 		} 
 		else {
 			$allData = $returnBB;
+			echo json_encode($allData);
 		}
-
-		echo json_encode($allData);
-		mysqli_close($con);
 	}
 
 	// returns Bollinger Bands Data (timestamp, BBWidth)

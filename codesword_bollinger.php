@@ -68,9 +68,19 @@
 	function codesword_bollinger_bands3($real, $period=20) {
 		$bollingerBands = [];
 
+		if ( ($real == 0) || ($real == []) || ($real == null) ) {
+			//No Real Data
+			return 0;
+		}
+
 		//compute the simple moving average and the standard deviation
 		$std_dev = codesword_sd_ohlc($real, $period);
 		//return $std_dev;
+
+		if ( ($std_dev == 0) || ($std_dev == []) || ($std_dev == null) ) {
+			//No Standard Deviation Data
+			return 0;
+		}
 
 		$diff = 0;
 		for ($i=0; $i < count($real); $i++) { 
@@ -142,19 +152,16 @@
 		//when comparing values over a small period of time for
 		//trend detection
 		for ($i=0; $i < count($input); $i++) { 
-			$timestamp[$i] = $input[$i][0];
-			$open[$i] = $input[$i][1];
-			$high[$i] = $input[$i][2];
-			$low[$i] = $input[$i][3];
-			$close[$i] = $input[$i][4];
-			$sma[$i] = $input[$i][5];
-			$upperSD1[$i] = $input[$i][6];
-			$lowerSD1[$i] = $input[$i][7];
-			$upperSD2[$i] = $input[$i][8];
-			$lowerSD2[$i] = $input[$i][9];
-		
-			//echo $timestamp[$i].", ".$open[$i].", ".$high[$i].", ".$low[$i].", ".$close[$i].", ";
-			//echo $sma[$i].", ".$upperSD1[$i].", ".$lowerSD1[$i].", ".$upperSD2[$i].", ".$lowerSD2[$i]."<Br>";
+			$timestamp[$i] = isset($input[$i][0]) ? $input[$i][0] : null;
+			$open[$i] = isset($input[$i][1]) ? $input[$i][1] : null;
+			$high[$i] = isset($input[$i][2]) ? $input[$i][2] : null;
+			$low[$i] = isset($input[$i][3]) ? $input[$i][3] : null;
+			$close[$i] = isset($input[$i][4]) ? $input[$i][4] : null;
+			$sma[$i] = isset($input[$i][5]) ? $input[$i][5] : null;
+			$upperSD1[$i] = isset($input[$i][6]) ? $input[$i][6] : null;
+			$lowerSD1[$i] = isset($input[$i][7]) ? $input[$i][7] : null;
+			$upperSD2[$i] = isset($input[$i][8]) ? $input[$i][8] : null;
+			$lowerSD2[$i] = isset($input[$i][9]) ? $input[$i][9] : null;
 		}
 
 		for ($i=1; $i < count($input); $i++) { 
@@ -380,6 +387,20 @@
 		return $signals;
 	}
 
+	// Returns the latest trade signal
+	function codesword_bbTrendDetectorLatests($input) {
+		$bb3 = codesword_bbTrendDetector($input);
+
+		if ( ($bb3 == 0) || ($bb3 == []) || ($bb3 == null) ) {
+			//No Signals
+			return 0;
+		}
+
+		$latest = $bb3[count($bb3) - 1];
+
+		//return $bb3 latest;
+		return $latest;
+	}
 
 	// This function computes the bollinger bands width of the stock
 	// Real - data of which structure is [timestamp, close]
