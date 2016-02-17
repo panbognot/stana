@@ -1,4 +1,16 @@
 <?php 
+	function tableExists($con, $table) {
+	    $sql = "SHOW TABLES LIKE '$table'";
+	    $result = mysqli_query($con, $sql);
+
+	    if(mysqli_num_rows($result) > 0) {
+	        return true;
+	    } 
+	    else {
+	    	return false;
+	    }
+	}
+
 	// generate the names of all the companies
 	function importHoldingsData ($host, $db, $user, $pass, $data) {
 		// Create connection
@@ -10,15 +22,22 @@
 		  return;
 		}
 
-		//TODO: create table if it doesn't exist yet
-		/*CREATE TABLE `pse_data`.`current_holdings` (
-		  `quote` VARCHAR(16) NOT NULL,
-		  `datebuy` DATE NOT NULL,
-		  `pricebuy` FLOAT NULL,
-		  `volume` INT NULL,
-		  `pricestoploss` FLOAT NULL,
-		  PRIMARY KEY (`quote`))
-		COMMENT = 'contains the current stocks being held and the stop loss selling price';*/
+		//create table if it doesn't exist yet
+		$tableExists = tableExists($con, "current_holdings");
+		if (!$tableExists) {
+			$createTable = "CREATE TABLE `pse_data`.`current_holdings` (
+							  `quote` VARCHAR(16) NOT NULL,
+							  `datebuy` DATE NOT NULL,
+							  `pricebuy` FLOAT NULL,
+							  `volume` INT NULL,
+							  `pricestoploss` FLOAT NULL,
+							  PRIMARY KEY (`quote`))
+							COMMENT = 'contains the current stocks being held and the stop loss selling price'";
+
+			$result = mysqli_query($con, $createTable);
+
+			echo "importHoldingsData: Created table 'current_holdings' <Br><Br>";
+		}
 
 		$sql = "REPLACE INTO current_holdings (datebuy, quote, pricebuy, volume)";
 
