@@ -37,6 +37,9 @@ $buys = importHoldingsFromCSV("currentHoldings.csv");
 
 echo json_encode($buys) . "<Br><Br>";
 
+//Generate the Stop Loss Price (slp)
+//SLP = Buy Price - 1 ATR
+
 importHoldingsData ($mysql_host, $mysql_database, $mysql_user, $mysql_password, $buys);
 
 ?>
