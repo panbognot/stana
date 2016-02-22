@@ -5,7 +5,7 @@ function dynamicDataURL () {
         dataURL = "http://localhost/stana/";
     } 
     else if (window.location.hostname == "www.codesword.com") {
-        dataURL = "http://www.codesword.com/stocksta/";
+        dataURL = "http://www.codesword.com/";
     }
     else {
         dataURL = "";
