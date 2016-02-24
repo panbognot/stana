@@ -2,17 +2,22 @@
 <html>
 <head>
 	<title>Stock Analyzer Tools</title>
-<!--     
-    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
--->
-<!--     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-	<script src="https://code.highcharts.com/stock/highstock.js"></script>
-	<script src="https://code.highcharts.com/stock/modules/exporting.js"></script> -->
 
+<?php 
+    $serverName = $_SERVER['SERVER_NAME'];
+?>
 
-    <script src="js/jquery.min.js"></script>
+<?php if ($serverName == 'localhost'): ?>
+    <script src="js/jquery-1.11.3.min.js"></script>
     <script src="js/highstock.js"></script>
+    <script src="js/highcharts-more.js"></script>
     <script src="js/exporting.js"></script>
+<?php else: ?>
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<?php endif; ?>
 
     <script src="autocomplete.js"></script>
 

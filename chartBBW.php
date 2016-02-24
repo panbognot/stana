@@ -2,9 +2,21 @@
 <html>
 <head>
 	<title>Stock BBW Plot</title>
-	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-	<script src="https://code.highcharts.com/stock/highstock.js"></script>
-	<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
+<?php 
+    $serverName = $_SERVER['SERVER_NAME'];
+?>
+
+<?php if ($serverName == 'localhost'): ?>
+    <script src="js/jquery-1.11.3.min.js"></script>
+    <script src="js/highstock.js"></script>
+    <script src="js/exporting.js"></script>
+<?php else: ?>
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<?php endif; ?>
+
     <script src="js/dynamicpath.js"></script>
 </head>
 <body>
