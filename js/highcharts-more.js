@@ -1,10 +1,3 @@
-/*
- Highcharts JS v4.2.3 (2016-02-08)
-
- (c) 2009-2016 Torstein Honsi
-
- License: www.highcharts.com/license
-*/
 (function(m){typeof module==="object"&&module.exports?module.exports=m:m(Highcharts)})(function(m){function J(a,b,c){this.init(a,b,c)}var O=m.arrayMin,P=m.arrayMax,s=m.each,F=m.extend,t=m.merge,Q=m.map,q=m.pick,A=m.pInt,o=m.getOptions().plotOptions,k=m.seriesTypes,u=m.extendClass,K=m.splat,v=m.wrap,L=m.Axis,y=m.Tick,G=m.Point,R=m.Pointer,S=m.CenteredSeriesMixin,B=m.TrackerMixin,w=m.Series,x=Math,E=x.round,C=x.floor,M=x.max,T=m.Color,r=function(){};F(J.prototype,{init:function(a,b,c){var d=this,g=
 d.defaultOptions;d.chart=b;d.options=a=t(g,b.angular?{background:{}}:void 0,a);(a=a.background)&&s([].concat(K(a)).reverse(),function(a){var g=a.backgroundColor,b=c.userOptions,a=t(d.defaultBackgroundOptions,a);if(g)a.backgroundColor=g;a.color=a.backgroundColor;c.options.plotBands.unshift(a);b.plotBands=b.plotBands||[];b.plotBands!==c.options.plotBands&&b.plotBands.unshift(a)})},defaultOptions:{center:["50%","50%"],size:"85%",startAngle:0},defaultBackgroundOptions:{shape:"circle",borderWidth:1,borderColor:"silver",
 backgroundColor:{linearGradient:{x1:0,y1:0,x2:0,y2:1},stops:[[0,"#FFF"],[1,"#DDD"]]},from:-Number.MAX_VALUE,innerRadius:0,to:Number.MAX_VALUE,outerRadius:"105%"}});var z=L.prototype,y=y.prototype,U={getOffset:r,redraw:function(){this.isDirty=!1},render:function(){this.isDirty=!1},setScale:r,setCategories:r,setTitle:r},N={isRadial:!0,defaultRadialGaugeOptions:{labels:{align:"center",x:0,y:null},minorGridLineWidth:0,minorTickInterval:"auto",minorTickLength:10,minorTickPosition:"inside",minorTickWidth:1,
