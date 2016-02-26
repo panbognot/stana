@@ -45,9 +45,14 @@ function plotStock () {
 
     var timerange = '3y';
 
-    stochasticURL = dynamicDataURL() + 'getData.php?company='+company+'&timerange='+timerange+'&chart=stoch&dataorg=highchart';
+    macdURL = dynamicDataURL() + 'getData.php?company='+company+
+            '&timerange='+timerange+'&chart=macd&dataorg=highchart';
 
-    bollinger3URL = dynamicDataURL() + 'getData.php?company='+company+'&timerange='+timerange+'&chart=bollinger3&dataorg=highchart&ensig=true';
+    stochasticURL = dynamicDataURL() + 'getData.php?company='+company+
+            '&timerange='+timerange+'&chart=stoch&dataorg=highchart';
+
+    bollinger3URL = dynamicDataURL() + 'getData.php?company='+company+
+            '&timerange='+timerange+'&chart=bollinger3&dataorg=highchart&ensig=true';
 
     var prices;
     var signalsData;
@@ -60,6 +65,9 @@ function plotStock () {
         bollingerBandsSD2 = [],
         percentK = [],
         percentD = [],
+        macd = [],
+        signal = [],
+        divergence = [],
         dataLength,
         // set the allowed units for data grouping
         groupingUnits = [[
@@ -72,174 +80,231 @@ function plotStock () {
         //general counter
         i = 0;
 
-    $.getJSON(stochasticURL, function (data) {
+    //get data for stochastic chart
+    $.getJSON(stochasticURL, function (dataStoch) {
         //Data arrangement for stochastic is timestamp, close, %K, %D
-        for (i; i < data.length; i += 1) {
+        for (i=0; i < dataStoch.length; i += 1) {
             percentK.push([
-                data[i][0], // the date
-                data[i][1], // %K
+                dataStoch[i][0], // the date
+                dataStoch[i][1], // %K
             ]);
 
             percentD.push([
-                data[i][0], // the date
-                data[i][2] // %D
+                dataStoch[i][0], // the date
+                dataStoch[i][2] // %D
             ]);
         }
 
-        testData = percentK;
-        testData2 = percentD;
-
-        //get data from the bollinger bands 3
-        $.getJSON(bollinger3URL, function (data) {
-            prices = data[0];
-            signalsData = data[1];
-
-            // split the data set into sma, bollinger upper band, bollinger lower band
-            sma = [];
-            ohlc = [];
-            signals = [];
-            bollingerBandsSD1 = [];
-            bollingerBandsSD2 = [];
-
-            i = 0;
-
-            for (i; i < prices.length; i += 1) {
-                ohlc.push([
-                    prices[i][0], // the date
-                    prices[i][1], // open
-                    prices[i][2], // high
-                    prices[i][3], // low
-                    prices[i][4] // close
+        //get data for macd chart    
+        $.getJSON(macdURL, function (dataMacd) {
+            //Data for MACD
+            for (i=0; i < dataMacd.length; i += 1) {
+                macd.push([
+                    dataMacd[i][0], // the date
+                    dataMacd[i][1], // macd
                 ]);
 
-                sma.push([
-                    prices[i][0], // the date
-                    prices[i][5], // sma
+                signal.push([
+                    dataMacd[i][0], // the date
+                    dataMacd[i][2], // signal
                 ]);
 
-                bollingerBandsSD1.push([
-                    prices[i][0], // the date
-                    prices[i][6], // the upper band
-                    prices[i][7], // the lower band
-                ]);
-
-                bollingerBandsSD2.push([
-                    prices[i][0], // the date
-                    prices[i][8], // the upper band
-                    prices[i][9], // the lower band
+                divergence.push([
+                    dataMacd[i][0], // the date
+                    dataMacd[i][3] // the divergence
                 ]);
             }
 
-            var tradeSignalsBollinger = [];
-            var tempTS, tempTitle, tempFillColor;
-            for (var j = 0; j < signalsData.length; j += 1) {
-                tempTS = signalsData[j][0];
-                tempTitle = signalsData[j][1];
+            //get data for the bollinger bands 3
+            $.getJSON(bollinger3URL, function (data) {
+                prices = data[0];
+                signalsData = data[1];
 
-                if (tempTitle == "buy") {
-                    tempFillColor = "yellowgreen";
+                // split the data set into sma, bollinger upper band, bollinger lower band
+                sma = [];
+                ohlc = [];
+                signals = [];
+                bollingerBandsSD1 = [];
+                bollingerBandsSD2 = [];
+
+                for (i=0; i < prices.length; i += 1) {
+                    ohlc.push([
+                        prices[i][0], // the date
+                        prices[i][1], // open
+                        prices[i][2], // high
+                        prices[i][3], // low
+                        prices[i][4] // close
+                    ]);
+
+                    sma.push([
+                        prices[i][0], // the date
+                        prices[i][5], // sma
+                    ]);
+
+                    bollingerBandsSD1.push([
+                        prices[i][0], // the date
+                        prices[i][6], // the upper band
+                        prices[i][7], // the lower band
+                    ]);
+
+                    bollingerBandsSD2.push([
+                        prices[i][0], // the date
+                        prices[i][8], // the upper band
+                        prices[i][9], // the lower band
+                    ]);
                 }
-                else if(tempTitle == "sell"){
-                    tempFillColor = "red";
-                }
 
-                tradeSignalsBollinger[j] = {x: tempTS, title: tempTitle, fillColor: tempFillColor};
-            }
+                var tradeSignalsBollinger = [];
+                var tempTS, tempTitle, tempFillColor;
+                for (var j = 0; j < signalsData.length; j += 1) {
+                    tempTS = signalsData[j][0];
+                    tempTitle = signalsData[j][1];
 
-            // Create the chart
-            $('#container').highcharts('StockChart', {
-                rangeSelector : {
-                    selected : 2
-                },
-
-                title : {
-                    text : company.toUpperCase() + ' Entry Finder Plots'
-                },
-
-                yAxis : [{
-                    labels: {
-                        align: 'right',
-                        x: -3
-                    },
-                    title: {
-                        text: 'Price'
-                    },
-                    height: '80%',
-                    lineWidth: 2
-                }, {
-                    labels: {
-                        align: 'right',
-                        x: -3
-                    },
-                    title: {
-                        text: 'Oscillator'
-                    },
-                    top: '80%',
-                    height: '20%',
-                    offset: 0,
-                    lineWidth: 2
-                }],
-
-                series : [
-                {
-                    type: 'areasplinerange',
-                    name: 'bb sd 2',
-                    data: bollingerBandsSD2,
-                    color: 'yellow'
-                },
-                {
-                    type: 'areasplinerange',
-                    name: 'bb sd 1',
-                    data: bollingerBandsSD1,
-                    color: 'orange'
-                },
-                {
-                    name: 'SMA',
-                    data: sma,
-                    color: 'black'
-                },
-                {
-                    type: 'candlestick',
-                    name: 'Candlestick',
-                    id : "candlestick",
-                    data: ohlc
-                },
-                {
-                    type : 'flags',
-                    data : tradeSignalsBollinger,
-                    onSeries: "candlestick",
-                    shape: 'squarepin',
-                    width: 16,
-                    style: { // text style
-                        color: 'white'
-                    },
-                    states: {
-                        hover: {
-                            fillColor: '#yellowgreen' // darker
-                        }
+                    if (tempTitle == "buy") {
+                        tempFillColor = "yellowgreen";
                     }
-                },
-                {
-                    name: '%D',
-                    data: percentD,
-                    yAxis: 1,
-                    color: '#760E0E'
-                },
-                {
-                    name: '%K',
-                    data: percentK,
-                    yAxis: 1,
-                    color: '#B0CF71'
-                }]
+                    else if(tempTitle == "sell"){
+                        tempFillColor = "red";
+                    }
+
+                    tradeSignalsBollinger[j] = {x: tempTS, title: tempTitle, fillColor: tempFillColor};
+                }
+
+                // Create the chart
+                $('#container').highcharts('StockChart', {
+                    rangeSelector : {
+                        selected : 2
+                    },
+
+                    title : {
+                        text : company.toUpperCase() + ' Entry Finder Plots'
+                    },
+
+                    yAxis : [{
+                        labels: {
+                            align: 'right',
+                            x: -3
+                        },
+                        title: {
+                            text: 'Price'
+                        },
+                        height: '70%',
+                        lineWidth: 2
+                    }, {
+                        labels: {
+                            align: 'right',
+                            x: -3
+                        },
+                        title: {
+                            text: 'Oscillator'
+                        },
+                        top: '71%',
+                        height: '14%',
+                        offset: 0,
+                        lineWidth: 2,
+                        plotLines: [{
+                            value: 20,
+                            color: 'green',
+                            dashStyle: 'shortdash',
+                            width: 1,
+                            label: {
+                                text: 'Oversold'
+                            }
+                        }, {
+                            value: 80,
+                            color: 'red',
+                            dashStyle: 'shortdash',
+                            width: 1,
+                            label: {
+                                text: 'Overbought'
+                            }
+                        }]
+                    }, {
+                        labels: {
+                            align: 'right',
+                            x: -3
+                        },
+                        title: {
+                            text: 'macd'
+                        },
+                        top: '86%',
+                        height: '14%',
+                        offset: 0,
+                        lineWidth: 2
+                    }],
+
+                    series : [
+                    {
+                        type: 'areasplinerange',
+                        name: 'bb sd 2',
+                        data: bollingerBandsSD2,
+                        color: 'yellow'
+                    }, {
+                        type: 'areasplinerange',
+                        name: 'bb sd 1',
+                        data: bollingerBandsSD1,
+                        color: 'orange'
+                    }, {
+                        name: 'SMA',
+                        data: sma,
+                        color: 'black'
+                    }, {
+                        type: 'candlestick',
+                        name: 'Candlestick',
+                        id : "candlestick",
+                        data: ohlc
+                    }, {
+                        type : 'flags',
+                        data : tradeSignalsBollinger,
+                        onSeries: "candlestick",
+                        shape: 'squarepin',
+                        width: 16,
+                        style: { // text style
+                            color: 'white'
+                        },
+                        states: {
+                            hover: {
+                                fillColor: '#yellowgreen' // darker
+                            }
+                        }
+                    }, {
+                        name: '%K',
+                        data: percentK,
+                        yAxis: 1,
+                        color: '#760E0E'
+                    }, {
+                        name: '%D',
+                        data: percentD,
+                        yAxis: 1,
+                        color: '#B0CF71'
+                    }, {
+                        //type: 'spline',
+                        name: 'MACD',
+                        data: macd,
+                        yAxis: 2,
+                    }, {
+                        type: 'column',
+                        name: 'Divergence',
+                        data: divergence,
+                        yAxis: 2,
+                    }, {
+                        //type: 'spline',
+                        name: 'Signal',
+                        data: signal,
+                        yAxis: 2,
+                    }]
+                });
             });
+            //end of the Bollinger Bands 3 call
+
         });
-        //end of the Bollinger Bands 3 call
+        //end of the MACD call 
 
     });
     //end of the Stochastic Call
 }
 
-$("#container").css("height", (screen.height) * 0.95 );
+$("#container").css("height", screen.height );
 
 plotStock();
 </script>
