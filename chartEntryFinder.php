@@ -100,19 +100,10 @@ function plotStock () {
             signals = [];
             bollingerBandsSD1 = [];
             bollingerBandsSD2 = [];
-            dataLength = prices.length;
-            // set the allowed units for data grouping
-            groupingUnits = [[
-                'week',                         // unit name
-                [1]                             // allowed multiples
-            ], [
-                'month',
-                [1, 2, 3, 4, 6]
-            ]];
 
             i = 0;
 
-            for (i; i < dataLength; i += 1) {
+            for (i; i < prices.length; i += 1) {
                 ohlc.push([
                     prices[i][0], // the date
                     prices[i][1], // open
@@ -229,16 +220,16 @@ function plotStock () {
                     }
                 },
                 {
-                    name: '%K',
-                    data: percentK,
-                    yAxis: 1,
-                    color: 'red'
-                },
-                {
                     name: '%D',
                     data: percentD,
                     yAxis: 1,
-                    color: 'black'
+                    color: '#760E0E'
+                },
+                {
+                    name: '%K',
+                    data: percentK,
+                    yAxis: 1,
+                    color: '#B0CF71'
                 }]
             });
         });
