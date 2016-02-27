@@ -188,7 +188,7 @@ function plotStock () {
                         title: {
                             text: 'Price'
                         },
-                        height: '70%',
+                        height: '66%',
                         lineWidth: 2
                     }, {
                         labels: {
@@ -198,8 +198,8 @@ function plotStock () {
                         title: {
                             text: 'Oscillator'
                         },
-                        top: '71%',
-                        height: '14%',
+                        top: '67%',
+                        height: '16%',
                         offset: 0,
                         lineWidth: 2,
                         plotLines: [{
@@ -227,8 +227,8 @@ function plotStock () {
                         title: {
                             text: 'macd'
                         },
-                        top: '86%',
-                        height: '14%',
+                        top: '84%',
+                        height: '16%',
                         offset: 0,
                         lineWidth: 2
                     }],
@@ -304,7 +304,7 @@ function plotStock () {
     //end of the Stochastic Call
 }
 
-$("#container").css("height", screen.height );
+$("#container").css("height", screen.height * 1.2 );
 
 plotStock();
 </script>
