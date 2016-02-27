@@ -49,13 +49,14 @@ function plotStock () {
             '&timerange='+timerange+'&chart=macd&dataorg=highchart';
 
     stochasticURL = dynamicDataURL() + 'getData.php?company='+company+
-            '&timerange='+timerange+'&chart=stoch&dataorg=highchart';
+            '&timerange='+timerange+'&chart=stomacd&dataorg=highchart';
 
     bollinger3URL = dynamicDataURL() + 'getData.php?company='+company+
             '&timerange='+timerange+'&chart=bollinger3&dataorg=highchart&ensig=true';
 
     var prices;
-    var signalsData;
+    var signalsBollinger = [],
+        signalsStoch = [];
 
     // split the data set into sma, bollinger upper band, bollinger lower band
     var sma = [],
@@ -81,7 +82,10 @@ function plotStock () {
         i = 0;
 
     //get data for stochastic chart
-    $.getJSON(stochasticURL, function (dataStoch) {
+    $.getJSON(stochasticURL, function (dataStoMACD) {
+        var dataStoch = dataStoMACD[0];
+        var dataStochSigs = dataStoMACD[1];
+
         //Data arrangement for stochastic is timestamp, close, %K, %D
         for (i=0; i < dataStoch.length; i += 1) {
             percentK.push([
@@ -94,6 +98,22 @@ function plotStock () {
                 dataStoch[i][2] // %D
             ]);
         }
+
+        var tempTS, tempTitle, tempFillColor;
+        for (var j = 0; j < dataStochSigs.length; j += 1) {
+            tempTS = dataStochSigs[j][0];
+            tempTitle = dataStochSigs[j][1];
+
+            if (tempTitle == "buy") {
+                tempFillColor = "yellowgreen";
+            }
+            else if(tempTitle == "sell"){
+                tempFillColor = "red";
+            }
+
+            signalsStoch[j] = {x: tempTS, title: tempTitle, fillColor: tempFillColor};
+        }        
+        testData = signalsStoch;
 
         //get data for macd chart    
         $.getJSON(macdURL, function (dataMacd) {
@@ -118,7 +138,7 @@ function plotStock () {
             //get data for the bollinger bands 3
             $.getJSON(bollinger3URL, function (data) {
                 prices = data[0];
-                signalsData = data[1];
+                signalsBollinger = data[1];
 
                 // split the data set into sma, bollinger upper band, bollinger lower band
                 sma = [];
@@ -156,9 +176,9 @@ function plotStock () {
 
                 var tradeSignalsBollinger = [];
                 var tempTS, tempTitle, tempFillColor;
-                for (var j = 0; j < signalsData.length; j += 1) {
-                    tempTS = signalsData[j][0];
-                    tempTitle = signalsData[j][1];
+                for (var j = 0; j < signalsBollinger.length; j += 1) {
+                    tempTS = signalsBollinger[j][0];
+                    tempTitle = signalsBollinger[j][1];
 
                     if (tempTitle == "buy") {
                         tempFillColor = "yellowgreen";
@@ -269,6 +289,7 @@ function plotStock () {
                         }
                     }, {
                         name: '%K',
+                        id: 'stochastic',
                         data: percentK,
                         yAxis: 1,
                         color: '#760E0E'
@@ -277,6 +298,21 @@ function plotStock () {
                         data: percentD,
                         yAxis: 1,
                         color: '#B0CF71'
+                    }, {
+                        type : 'flags',
+                        data : signalsStoch,
+                        yAxis: 1,
+                        onSeries: 'stochastic',
+                        shape: 'squarepin',
+                        width: 16,
+                        style: { // text style
+                            color: 'white'
+                        },
+                        states: {
+                            hover: {
+                                fillColor: '#yellowgreen' // darker
+                            }
+                        }
                     }, {
                         //type: 'spline',
                         name: 'MACD',

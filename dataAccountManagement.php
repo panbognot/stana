@@ -105,6 +105,10 @@
 		//generate trade signals from stochastic values
 		$stochSignals = codesword_stochTradeDetector($stoch);
 
-		echo json_encode($stochSignals);
+		//echo json_encode($stochSignals);
+		$allData[0] = $stoch;
+		$allData[1] = $stochSignals;
+
+		echo json_encode($allData);
 	}
 ?>
