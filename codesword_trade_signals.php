@@ -23,13 +23,18 @@
 		}
 
 		for ($i=1; $i < count($input); $i++) { 
-			//check if current percentK is above 50
+			//check if current %K is above 50 and
+			//check if previous %K is less than 50
 			if ( ($percentK[$i] >= 50) && ($percentK[$i-1] < 50) ) {
-				$signals[$ctr][0] = $timestamp[$i];
-				$signals[$ctr][1] = "buy";
-				$signals[$ctr][2] = "check if close or current price is above SMA";
+				//check if %D is greater than the previous %D
+				//this will eliminate some false signals from a down trend
+				if ($percentD[$i] > $percentD[$i-1]) {
+					$signals[$ctr][0] = $timestamp[$i];
+					$signals[$ctr][1] = "buy";
+					$signals[$ctr][2] = "check if close or current price is above SMA";
 
-				$ctr++;
+					$ctr++;
+				}
 			}
 		}
 
