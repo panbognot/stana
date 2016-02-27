@@ -380,7 +380,6 @@
 					$signals[$k][4] = $signals[$k-1][4];
 				}
 			}
-			
 		}
 
 		//echo json_encode($signals);

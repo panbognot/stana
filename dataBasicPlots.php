@@ -200,13 +200,14 @@
 		  return;
 		}
 
-		if ($dataorg == "highchart") {
+		if ( ($dataorg == "highchart") || ($dataorg == "array2") ) {
 			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT (+8:00)
 			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, 
 					open, high, low, close, volume 
 					FROM $company 
 					WHERE timestamp >= '".$from."' AND timestamp <= '".$to."' ORDER BY timestamp ASC";
-		} else {
+		}
+		else {
 			$sql = "SELECT DATE_FORMAT(timestamp, '%Y-%m-%d') as timestamp, open, high, low, close, volume 
 					FROM $company 
 					WHERE timestamp >= '".$from."' AND timestamp <= '".$to."' ORDER BY timestamp ASC";
@@ -239,7 +240,20 @@
 			  	$temp[5] = $row['volume'];
 			}
 			elseif ($dataorg == "array") {
-				//TODO: create code for organizing an array data output
+				$dbreturn[$ctr][0] = $row['timestamp'];
+				$dbreturn[$ctr][1] = floatval($row['open']);
+				$dbreturn[$ctr][2] = floatval($row['high']);
+				$dbreturn[$ctr][3] = floatval($row['low']);
+				$dbreturn[$ctr][4] = floatval($row['close']);
+				$dbreturn[$ctr][5] = intval($row['volume']);
+			}
+			elseif ($dataorg == "array2") {
+				$dbreturn[$ctr][0] = doubleval($row['timestamp']);
+				$dbreturn[$ctr][1] = floatval($row['open']);
+				$dbreturn[$ctr][2] = floatval($row['high']);
+				$dbreturn[$ctr][3] = floatval($row['low']);
+				$dbreturn[$ctr][4] = floatval($row['close']);
+				$dbreturn[$ctr][5] = intval($row['volume']);
 			}
 			else {
 				$dbreturn[$ctr]['timestamp'] = $row['timestamp'];
@@ -259,14 +273,15 @@
 		elseif ($dataorg == "highchart") {
 			echo "[".$temp[0].",".$temp[1].",".$temp[2].",".$temp[3].",".$temp[4].",".$temp[5]."]]";
 		}
-		elseif ($dataorg == "array") {
-		//TODO: create code for organizing an array data output
+		elseif (($dataorg == "array") || ($dataorg == "array2")) {
+			mysqli_close($con);
+			return $dbreturn;
 		}
 		else { //json
 			echo json_encode( $dbreturn );
 		}
 
-	   mysqli_close($con);
+	    mysqli_close($con);
 	}
 
 	// returns OHLC for a heikin-ashi candlestick chart
@@ -352,6 +367,6 @@
 			echo json_encode( $ohlcha );
 		}
 
-	   mysqli_close($con);
+	    mysqli_close($con);
 	}	
 ?>

@@ -1,4 +1,7 @@
 <?php 
+	require_once('dataBasicPlots.php');
+	require_once('codesword_trade_signals.php');
+
 	function tableExists($con, $table) {
 	    $sql = "SHOW TABLES LIKE '$table'";
 	    $result = mysqli_query($con, $sql);
@@ -68,4 +71,40 @@
 		mysqli_close($con);
 	}
 
+	// returns OHLC for a candlestick chart
+	function getStoMACD ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
+		$thlc = [];			//[timestamp,high,low,close]
+		$stoch = [];		//[timestamp,%K,%D]
+		$stochSignals = [];	//[timestamp,signal,desc]
+
+		//OHLC data format [timestamp,open,high,low,close,volume]
+		if ($dataorg == "highchart") {
+			$dataOhlc = getOHLC ($company, $from, $to, "array2", $host, $db, $user, $pass);
+		} else {
+			$dataOhlc = getOHLC ($company, $from, $to, "array", $host, $db, $user, $pass);
+		}
+		
+		//echo json_encode($dataOhlc);
+
+		//Input for stochastic convestion should be [timestamp,high,low,close]
+		$ctr = 0;
+		foreach ($dataOhlc as $ohlc) {
+			$thlc[$ctr][0] = $ohlc[0];	//timestamp
+			$thlc[$ctr][1] = $ohlc[2];	//high
+			$thlc[$ctr][2] = $ohlc[3];	//low
+			$thlc[$ctr++][3] = $ohlc[4];	//close
+		}
+
+		//echo json_encode($thlc);
+
+		//generate stochastic values
+		$stoch = codesword_stochastic($thlc);
+
+		//echo json_encode($stoch);
+
+		//generate trade signals from stochastic values
+		$stochSignals = codesword_stochTradeDetector($stoch);
+
+		echo json_encode($stochSignals);
+	}
 ?>

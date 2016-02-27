@@ -68,7 +68,7 @@
 			$returnStochastic = codesword_stochastic($dbreturn, $studyPeriod, $smoothingPeriod);
 		}
 		elseif ($dataorg == "array") {
-		//TODO: create code for organizing an array data output
+			//TODO: create code for organizing an array data output
 		}
 		else { //json
 			$returnStochastic = codesword_stochastic($dbreturn, $studyPeriod, $smoothingPeriod);

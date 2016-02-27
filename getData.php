@@ -10,6 +10,7 @@
 	require_once('dataTR.php');
 	require_once('dataADX.php');
 	require_once('dataBollinger.php');
+	require_once('dataAccountManagement.php');
 
 	//initialize variables
 	$debug_mode = false;
@@ -289,6 +290,10 @@
 				break;
 			case 'bbw':
 				getBBW($company, $fromDate, $toDate, $dataorg, 
+					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+				break;
+			case 'stomacd':
+				getStoMACD($company, $fromDate, $toDate, $dataorg,
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				break;
 			default:
