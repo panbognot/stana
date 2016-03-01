@@ -26,6 +26,53 @@
 		return $sma;
 	}
 
+	// this function compares the closing price/current price against the SMA
+	// Real - data of which structure is [timestamp,high,low,close]
+	// Output - [timestamp, true/false]
+	//		True -> if Close/Current is higher than SMA
+	//		False -> if Close/Current is lower
+	function codesword_isHigherThanSMA($real, $period=20) {
+		$sma = [];
+		$isHigher = [];
+		$k = 2 / ($period + 1);
+		$ctr = 0;
+
+		//Compute the Simple Moving Average
+		for ($i=$period-1; $i < count($real); $i++) {
+			//Reset sma to zero 
+			$sum = 0;
+			for ($j=0; $j < $period ; $j++) { 
+				$temp = $i - $j;
+				$sum += $real[$temp][3];
+			}
+
+			$sum = $sum / $period;
+
+			//timestamp value
+			$sma[$ctr][0] = $real[$i][0];
+			//sma value
+			$sma[$ctr][1] = $sum;
+			$ctr++;
+		}
+
+		//Compare the close price vs sma
+		$diff = $period - 1;
+		for ($j=0; $j < count($sma); $j++) { 
+			//timestamp value
+			$isHigher[$j][0] = $sma[$j][0];
+
+			//is close/current higher than sma?
+			if ($real[$j + $diff][3] > $sma[$j][1]) {
+				$isHigher[$j][1] = true;
+			}
+			else {
+				$isHigher[$j][1] = false;	
+			}
+		}
+
+		return $isHigher;
+	}
+
 	// Buy/Sell signals from Based from Price and SMA
 	// real - [timestamp, close price]
 	// sma - [timestamp, sma]

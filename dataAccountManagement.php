@@ -76,6 +76,8 @@
 		$thlc = [];			//[timestamp,high,low,close]
 		$stoch = [];		//[timestamp,%K,%D]
 		$stochSignals = [];	//[timestamp,signal,desc]
+		$stochSmaSignals = [];	//[timestamp,signal,desc]
+		$isCloseHigherThanSMA = [];	//[timestamp,boolean]
 
 		//OHLC data format [timestamp,open,high,low,close,volume]
 		if ($dataorg == "highchart") {
@@ -99,15 +101,22 @@
 
 		//generate stochastic values
 		$stoch = codesword_stochastic($thlc);
-
 		//echo json_encode($stoch);
+
+		//find out if the close/current price > sma
+		$isCloseHigherThanSMA = codesword_isHigherThanSMA($thlc);
+		//echo json_encode($isCloseHigherThanSMA);
 
 		//generate trade signals from stochastic values
 		$stochSignals = codesword_stochTradeDetector($stoch);
 
+		//do some more filtering
+		$stochSmaSignals = codesword_stochSmaTradeDetector($stochSignals, 
+														$isCloseHigherThanSMA);
+
 		//echo json_encode($stochSignals);
 		$allData[0] = $stoch;
-		$allData[1] = $stochSignals;
+		$allData[1] = $stochSmaSignals;
 
 		echo json_encode($allData);
 	}
