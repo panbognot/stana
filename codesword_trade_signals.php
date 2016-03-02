@@ -52,7 +52,15 @@
 		$filteredSignals = [];
 		$ctrFilt = 0;
 
-		if ($signalsStoch[0][0] > $isHigherThanSMA[0][0]) {
+		$stochStartDate = isset($signalsStoch[0][0]) ? $signalsStoch[0][0] : null;
+		$smaStartDate = isset($isHigherThanSMA[0][0]) ? $isHigherThanSMA[0][0] : null;
+
+		//Detect if Stoch Start Date or SMA Start Date is null
+		if ( !$stochStartDate || !$smaStartDate ) {
+			return 0;
+		}
+
+		if ($stochStartDate > $smaStartDate) {
 			$startDate = $signalsStoch[0][0];
 
 			for ($ctr=0; $ctr < count($isHigherThanSMA); $ctr++) { 

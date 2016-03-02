@@ -40,7 +40,8 @@
 
 		// Get %K = [(nClose - nLowestLow) / (nHighestHigh - nLowestLow)] * 100
 		$percentK = [];
-		$kOffset;
+		// Default offset is zero 
+		$kOffset = 0;
 		for ($i=0; $i < count($nHighestLowest); $i++) { 
 			if ($i == 0) {
 				for ($j=0; $j < $periodLookback; $j++) { 

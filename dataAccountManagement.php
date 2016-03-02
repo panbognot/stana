@@ -72,12 +72,15 @@
 	}
 
 	// returns OHLC for a candlestick chart
-	function getStoMACD ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
+	function getStoMACD ($company, $from="1900-01-01 00:00:00", $to=null, 
+						$dataorg="json", $ensig=false, 
+						$host, $db, $user, $pass) {
 		$thlc = [];			//[timestamp,high,low,close]
 		$stoch = [];		//[timestamp,%K,%D]
 		$stochSignals = [];	//[timestamp,signal,desc]
 		$stochSmaSignals = [];	//[timestamp,signal,desc]
 		$isCloseHigherThanSMA = [];	//[timestamp,boolean]
+		$dataOhlc = [];
 
 		//OHLC data format [timestamp,open,high,low,close,volume]
 		if ($dataorg == "highchart") {
@@ -88,9 +91,14 @@
 		
 		//echo json_encode($dataOhlc);
 
+		//Return if $dataOhlc is null
+		if ( ($dataOhlc == []) || ($dataOhlc == 0) ) {
+			return 0;
+		}
+
 		//Input for stochastic convestion should be [timestamp,high,low,close]
 		$ctr = 0;
-		foreach ($dataOhlc as $ohlc) {
+		foreach ((array)$dataOhlc as $ohlc) {
 			$thlc[$ctr][0] = $ohlc[0];	//timestamp
 			$thlc[$ctr][1] = $ohlc[2];	//high
 			$thlc[$ctr][2] = $ohlc[3];	//low
@@ -114,10 +122,27 @@
 		$stochSmaSignals = codesword_stochSmaTradeDetector($stochSignals, 
 														$isCloseHigherThanSMA);
 
-		//echo json_encode($stochSignals);
-		$allData[0] = $stoch;
-		$allData[1] = $stochSmaSignals;
+		if (strcasecmp($ensig, "latest") == 0) {
+			//return only the latest signal
+			// [timestamp,trade signal,... other info...]
+			if (count($stochSmaSignals) > 0) {
+				$lastSignal = $stochSmaSignals[count($stochSmaSignals)-1];
+				//echo json_encode($lastSignal);
+				return $lastSignal;
+			}
+			else {
+				return 0;
+			}
+		}
+		elseif ($ensig) {
+			//echo json_encode($stochSignals);
+			$allData[0] = $stoch;
+			$allData[1] = $stochSmaSignals;
 
-		echo json_encode($allData);
+			echo json_encode($allData);
+		} 
+		else {
+			echo json_encode($stoch);
+		}		
 	}
 ?>

@@ -3,12 +3,24 @@
 	require_once('dataBasicPlots.php');
 	require_once('dataSMA.php');
 	require_once('dataBollinger.php');
+	require_once('dataAccountManagement.php');
 
 	$toDate;
 	$fromDate;
 	$dataorg = "json";
 	$ensig = "latest";
 	$delta = "1 year";
+
+	//initialize variables
+	$debug_mode = false;
+
+	function debug_print($string) {
+		global $debug_mode;
+
+		if ($debug_mode) {
+			echo "$string";
+		}
+	}
 
 	if(isset($_GET['days'])) {
 		$days = (int)($_GET['days']);
@@ -26,6 +38,10 @@
 		        break;
 		    case "bb3":
 		        echo "BOLLINGER BANDS 3 <Br><Br>";
+		        $delta = "3 months";
+		        break;
+		    case "stomacd":
+		        echo "STOCHASTIC and MACD COMBINED <Br><Br>";
 		        $delta = "3 months";
 		        break;
 		    default:
@@ -63,19 +79,29 @@
 
 	//generate stock quotes
 	$companyList = readStockQuotes($mysql_host, $mysql_database, $mysql_user, $mysql_password);
-	//echo json_encode($companyList);
+	//echo json_encode($companyList) . "<Br><Br>";
 
 	$latestSignals = [];
 	$ctr = 0;
 	foreach ($companyList as $company) {
+		// echo "$company:<Br>";
+		$latest = 0;
 		switch ($type) {
 		    case "smac":
+		    	// echo "    smac<Br>";
 				$latest = getSMACombined($company, $fromDate, $toDate, $dataorg, 
 							20, 50, 120, $ensig, 
 							$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 		        break;
 		    case "bb3":
+		    	// echo "    bb3<Br>";
 		    	$latest = getBollingerBands3($company, $fromDate, $toDate, $dataorg, 
+							$ensig, 
+							$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+		        break;
+		    case "stomacd":
+		    	// echo "    stomacd<Br>";
+		    	$latest = getStoMACD($company, $fromDate, $toDate, $dataorg, 
 							$ensig, 
 							$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 		        break;

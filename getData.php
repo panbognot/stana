@@ -294,6 +294,7 @@
 				break;
 			case 'stomacd':
 				getStoMACD($company, $fromDate, $toDate, $dataorg,
+					$ensig, 
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				break;
 			default:

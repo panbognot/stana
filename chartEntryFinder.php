@@ -49,7 +49,7 @@ function plotStock () {
             '&timerange='+timerange+'&chart=macd&dataorg=highchart';
 
     stochasticURL = dynamicDataURL() + 'getData.php?company='+company+
-            '&timerange='+timerange+'&chart=stomacd&dataorg=highchart';
+            '&timerange='+timerange+'&chart=stomacd&dataorg=highchart&ensig=true';
 
     bollinger3URL = dynamicDataURL() + 'getData.php?company='+company+
             '&timerange='+timerange+'&chart=bollinger3&dataorg=highchart&ensig=true';
