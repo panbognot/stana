@@ -391,6 +391,11 @@
 		}
 	}
 
+	// check if its a weekend
+	function isWeekend($date) {
+	    return (date('N', strtotime($date)) >= 6);
+	}
+
 	// returns OHLC for a candlestick chart
 	function getOHLC ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
 		$ohlcur = [];	//ohl-current candlestick
@@ -494,7 +499,7 @@
 				break;
 		}
 
-		if ($dateToday > $latestTS) {
+		if ( ($dateToday > $latestTS) && !isWeekend($dateToday) ) {
 			$accessOHLCur = true;
 			//get the candlestick for today OHLCurrent
 			$ohlcur = getOHLCurrent($company, $dataorg, $host, $db, $user, $pass);
