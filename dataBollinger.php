@@ -159,57 +159,36 @@
 
 		$studyPeriod = 20;
 		$offsetPeriod = $studyPeriod * 1;
+
+		//from date has to be adjusted for the bollinger bands
+		$date = date_create($from);
+		date_add($date,date_interval_create_from_date_string("-$offsetPeriod days"));
+		$fromAdjusted =  date_format($date,"Y-m-d");
+		//echo "fromAdjusted: $fromAdjusted<Br>";
+
+		$dataOhlc = [];
+
+		//OHLC data format [timestamp,open,high,low,close,volume]
 		if ($dataorg == "highchart") {
-			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT (+8:00)
-			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, 
-					open, high, low, close
-					FROM $company 
-					WHERE timestamp >= DATE_ADD('".$from."', INTERVAL -$offsetPeriod DAY) 
-					AND timestamp <= '".$to."' ORDER BY timestamp ASC";
+			$dataOhlc = getOHLC ($company, $fromAdjusted, $to, "array2", $host, $db, $user, $pass);
 		} else {
-			$sql = "SELECT DATE_FORMAT(timestamp, '%Y-%m-%d') as timestamp, open, high, low, close
-					FROM $company 
-					WHERE timestamp >= DATE_ADD('".$from."', INTERVAL -$offsetPeriod DAY) 
-					AND timestamp <= '".$to."' ORDER BY timestamp ASC";
+			$dataOhlc = getOHLC ($company, $fromAdjusted, $to, "array", $host, $db, $user, $pass);
 		}
 
-		$result = mysqli_query($con, $sql);
+		//Return if $dataOhlc is null
+		if ( ($dataOhlc == []) || ($dataOhlc == 0) ) {
+			return 0;
+		}
 
-		$dbreturn = "";
+		//Input for bollinger bands should be [timestamp,open,high,low,close]
 		$ctr = 0;
-		$temp;
-		$returnBB = 0;
-		while($row = mysqli_fetch_array($result)) {
-			if ($dataorg == "json") {
-			  	$dbreturn[$ctr][0] = $row['timestamp'];
-				$dbreturn[$ctr][1] = floatval($row['open']);
-				$dbreturn[$ctr][2] = floatval($row['high']);
-				$dbreturn[$ctr][3] = floatval($row['low']);
-				$dbreturn[$ctr][4] = floatval($row['close']);
-			} 
-			elseif ($dataorg == "highchart") {
-			  	$dbreturn[$ctr][0] = doubleval($row['timestamp']);
-				$dbreturn[$ctr][1] = floatval($row['open']);
-				$dbreturn[$ctr][2] = floatval($row['high']);
-				$dbreturn[$ctr][3] = floatval($row['low']);
-				$dbreturn[$ctr][4] = floatval($row['close']);
-			}
-			elseif ($dataorg == "array") {
-				//TODO: create code for organizing an array data output
-			}
-			else {
-				$dbreturn[$ctr][0] = $row['timestamp'];
-				$dbreturn[$ctr][1] = floatval($row['open']);
-				$dbreturn[$ctr][2] = floatval($row['high']);
-				$dbreturn[$ctr][3] = floatval($row['low']);
-				$dbreturn[$ctr][4] = floatval($row['close']);
-			}
-
-			$ctr = $ctr + 1;
+		foreach ((array)$dataOhlc as $ohlc) {
+			$dbreturn[$ctr][0] = $ohlc[0];	//timestamp
+			$dbreturn[$ctr][1] = $ohlc[1];	//high
+			$dbreturn[$ctr][2] = $ohlc[2];	//low
+			$dbreturn[$ctr][3] = $ohlc[3];	//low
+			$dbreturn[$ctr++][4] = $ohlc[4];	//close
 		}
-
-		//close mysqli
-		mysqli_close($con);
 
 		if ($dataorg == "json") {
 			$bbohlc = codesword_bollinger_bands3($dbreturn, $studyPeriod);
