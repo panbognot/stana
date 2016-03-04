@@ -138,21 +138,13 @@
 
 		if ($dataorg == "highchart") {
 			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT
-/*			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, close 
-					FROM $company 
-					WHERE timestamp >= '".$from."' AND timestamp <= '".$to."' ORDER BY timestamp ASC";*/
-
 			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, current 
 					FROM current_prices 
-					WHERE company = '".$company."' AND timestamp > curdate() ORDER BY timestamp ASC";
+					WHERE company = '$company' AND timestamp > curdate() ORDER BY timestamp ASC";
 		} else {
-/*			$sql = "SELECT DATE_FORMAT(timestamp, '%Y-%m-%d') as timestamp, close 
-					FROM $company 
-					WHERE timestamp >= '".$from."' AND timestamp <= '".$to."' ORDER BY timestamp ASC";*/
-
 			$sql = "SELECT timestamp, current 
 					FROM current_prices 
-					WHERE company = '".$company."' AND timestamp > curdate() ORDER BY timestamp ASC";
+					WHERE company = '$company' AND timestamp > curdate() ORDER BY timestamp ASC";
 		}
 
 		$result = mysqli_query($con, $sql);
@@ -265,6 +257,124 @@
 		}
 
 	   mysqli_close($con);
+	}
+
+	// returns the OHL-Current values for the selected company
+	function getOHLCurrent ($company, $dataorg="json", $host, $db, $user, $pass) {
+		// Create connection
+		$con=mysqli_connect($host, $user, $pass, $db);
+		
+		// Check connection
+		if (mysqli_connect_errno()) {
+		  echo "Failed to connect to MySQL: " . mysqli_connect_error();
+		  return;
+		}
+
+		// reformat the company string
+		$company = str_replace("_", "", $company);
+
+		if ($dataorg == "highchart") {
+			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT
+			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, current 
+					FROM current_prices 
+					WHERE company = '".$company."' AND timestamp > curdate() ORDER BY timestamp ASC";
+
+			$sql = "SELECT 
+						(SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) 
+							FROM current_prices 
+							WHERE company = '$company' 
+							ORDER BY timestamp DESC LIMIT 1) AS timestamp,
+						ROUND((SELECT current 
+							FROM current_prices 
+							WHERE company = '$company' 
+							AND timestamp > curdate()  
+							ORDER BY timestamp ASC LIMIT 1),4) AS open, 
+						ROUND(max(current),4) AS high, 
+						ROUND(min(current),4) AS low, 
+						ROUND((SELECT current 
+							FROM current_prices 
+							WHERE company = '$company' 
+							AND timestamp > curdate()  
+							ORDER BY timestamp DESC LIMIT 1),4) AS current
+					FROM current_prices 
+					WHERE company = '$company' AND timestamp > curdate() ";
+		} else {
+			$sql = "SELECT 
+						(SELECT timestamp 
+							FROM current_prices 
+							WHERE company = '$company' 
+							ORDER BY timestamp DESC LIMIT 1) AS timestamp,
+						ROUND((SELECT current 
+							FROM current_prices 
+							WHERE company = '$company' 
+							AND timestamp > curdate()  
+							ORDER BY timestamp ASC LIMIT 1),4) AS open, 
+						ROUND(max(current),4) AS high, 
+						ROUND(min(current),4) AS low, 
+						ROUND((SELECT current 
+							FROM current_prices 
+							WHERE company = '$company' 
+							AND timestamp > curdate()  
+							ORDER BY timestamp DESC LIMIT 1),4) AS current
+					FROM current_prices 
+					WHERE company = '$company' AND timestamp > curdate() ";
+		}
+
+		$result = mysqli_query($con, $sql);
+
+		$dbreturn = "";
+		$ctr = 0;
+		$temp;
+		while($row = mysqli_fetch_array($result)) {
+			if ($dataorg == "json") {
+				$dbreturn[$ctr]['timestamp'] = $row['timestamp'];
+				$dbreturn[$ctr]['open'] = $row['open'];
+				$dbreturn[$ctr]['high'] = $row['high'];
+				$dbreturn[$ctr]['low'] = $row['low'];
+				$dbreturn[$ctr]['current'] = $row['current'];
+			} 
+			elseif ($dataorg == "highchart") {
+				//echo "[".$row['timestamp'].",".$row['current']."],";
+				$dbreturn[$ctr][0] = $row['timestamp'];
+				$dbreturn[$ctr][1] = $row['open'];
+				$dbreturn[$ctr][2] = $row['high'];
+				$dbreturn[$ctr][3] = $row['low'];
+				$dbreturn[$ctr][4] = $row['current'];
+			}
+			elseif ($dataorg == "array") {
+				$dbreturn[$ctr][0] = $row['timestamp'];
+				$dbreturn[$ctr][1] = $row['open'];
+				$dbreturn[$ctr][2] = $row['high'];
+				$dbreturn[$ctr][3] = $row['low'];
+				$dbreturn[$ctr][4] = $row['current'];
+			}
+			else {
+				$dbreturn[$ctr]['timestamp'] = $row['timestamp'];
+				$dbreturn[$ctr]['open'] = $row['open'];
+				$dbreturn[$ctr]['high'] = $row['high'];
+				$dbreturn[$ctr]['low'] = $row['low'];
+				$dbreturn[$ctr]['current'] = $row['current'];
+			}
+
+			$ctr = $ctr + 1;
+		}
+
+		mysqli_close($con);
+
+		if ($dataorg == "json") {
+			echo json_encode( $dbreturn );
+		} 
+		elseif ($dataorg == "highchart") {
+			//echo "[".$temp[0].",".$temp[1]."]]";
+			return $dbreturn;
+		}
+		elseif ($dataorg == "array") {
+			//TODO: create code for organizing an array data output
+			return $dbreturn;
+		}
+		else { //json
+			echo json_encode( $dbreturn );
+		}
 	}
 
 	// returns OHLC for a candlestick chart
