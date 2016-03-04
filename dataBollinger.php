@@ -148,15 +148,6 @@
 	function getBollingerBands3 ($company, $from="1900-01-01 00:00:00", $to=null, 
 								$dataorg="json", $enSignals=false,
 								$host, $db, $user, $pass) {
-		// Create connection
-		$con=mysqli_connect($host, $user, $pass, $db);
-		
-		// Check connection
-		if (mysqli_connect_errno()) {
-		  echo "Failed to connect to MySQL: " . mysqli_connect_error();
-		  return;
-		}
-
 		$studyPeriod = 20;
 		$offsetPeriod = $studyPeriod * 1;
 

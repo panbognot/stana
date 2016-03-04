@@ -15,47 +15,30 @@
 		}
 
 		$intervalPeriod = $samplePeriod * 1.5;
+		//from date has to be adjusted for the bollinger bands
+		$date = date_create($from);
+		date_add($date,date_interval_create_from_date_string("-$intervalPeriod days"));
+		$fromAdjusted =  date_format($date,"Y-m-d");
+
+		$dataOhlc = [];
+
+		//OHLC data format [timestamp,open,high,low,close,volume]
 		if ($dataorg == "highchart") {
-			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT (+8:00)
-			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, close
-					FROM $company 
-					WHERE timestamp >= DATE_ADD('".$from."', INTERVAL -$intervalPeriod DAY) AND timestamp <= '".$to."' ORDER BY timestamp ASC";
+			$dataOhlc = getOHLC ($company, $fromAdjusted, $to, "array2", $host, $db, $user, $pass);
 		} else {
-			$sql = "SELECT DATE_FORMAT(timestamp, '%Y-%m-%d') as timestamp, close 
-					FROM $company 
-					WHERE timestamp >= DATE_ADD('".$from."', INTERVAL -$intervalPeriod DAY) AND timestamp <= '".$to."' ORDER BY timestamp ASC";
+			$dataOhlc = getOHLC ($company, $fromAdjusted, $to, "array", $host, $db, $user, $pass);
 		}
 
-		$result = mysqli_query($con, $sql);
-
-		$dbreturn = "";
-		$ctr = 0;
-		$temp;
-		$arrayTS;
-		$arrayClose;
-
-		if (mysqli_num_rows($result) <= 0) {
+		//Return if $dataOhlc is null
+		if ( ($dataOhlc == []) || ($dataOhlc == 0) ) {
 			return 0;
-		}		
+		}
 
-		while($row = mysqli_fetch_array($result)) {
-			if ($dataorg == "json") {
-			  	$dbreturn[$ctr][0] = $arrayTS[$ctr] = $row['timestamp'];
-				$dbreturn[$ctr][1] = $arrayClose[$ctr] = floatval($row['close']);
-			} 
-			elseif ($dataorg == "highchart") {
-			  	$dbreturn[$ctr][0] = $arrayTS[$ctr] = doubleval($row['timestamp']);
-				$dbreturn[$ctr][1] = $arrayClose[$ctr] = floatval($row['close']);
-			}
-			elseif ($dataorg == "array") {
-				//TODO: create code for organizing an array data output
-			}
-			else {
-				$dbreturn[$ctr][0] = $arrayTS[$ctr] = $row['timestamp'];
-				$dbreturn[$ctr][1] = $arrayClose[$ctr] = floatval($row['close']);
-			}
-
-			$ctr = $ctr + 1;
+		//Input for SMA functions should be [timestamp,close]
+		$ctr = 0;
+		foreach ((array)$dataOhlc as $ohlc) {
+			$dbreturn[$ctr][0] = $ohlc[0];	//timestamp
+			$dbreturn[$ctr++][1] = $ohlc[4];	//close
 		}
 
 		return $dbreturn;
