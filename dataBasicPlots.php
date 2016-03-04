@@ -393,6 +393,9 @@
 
 	// returns OHLC for a candlestick chart
 	function getOHLC ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
+		$ohlcur = [];	//ohl-current candlestick
+		$accessOHLCur = false;	//don't read the ohlcurrent by default
+
 		// Create connection
 		$con=mysqli_connect($host, $user, $pass, $db);
 		
@@ -465,88 +468,112 @@
 			$ctr = $ctr + 1;
 		}
 
-		//get the candlestick for today OHLCurrent
-		$ohlcur = getOHLCurrent($company, $dataorg, $host, $db, $user, $pass);
+		if ($ctr <= 1) {
+			//no data
+			return 0;
+		}
 
-		//echo json_encode($ohlcur) . "<Br><Br>";
+		$dateToday = date('Y-m-d');
+		$latestTS = 0;
+
+		switch ($dataorg) {
+			case 'json':
+				$latestTS = $dbreturn[$ctr-1]['timestamp'];
+				break;
+			case 'highchart':
+				$latestTS = $dbreturn[$ctr-1][0];
+				break;
+			case 'array':
+				$latestTS = $dbreturn[$ctr-1][0];
+				break;
+			case 'array2':
+				$latestTS = $dbreturn[$ctr-1][0];
+				break;
+			default:
+				$latestTS = $dbreturn[$ctr-1]['timestamp'];
+				break;
+		}
+
+		if ($dateToday > $latestTS) {
+			$accessOHLCur = true;
+			//get the candlestick for today OHLCurrent
+			$ohlcur = getOHLCurrent($company, $dataorg, $host, $db, $user, $pass);
+		}
 
 		mysqli_close($con);
 
 		if ($dataorg == "json") {
-			$ts = date('Y-m-d', strtotime($ohlcur[0]['timestamp']));
-			//echo "ts new: " . $ts . "<Br>";
+			if ($accessOHLCur) {
+				$ts = date('Y-m-d', strtotime($ohlcur[0]['timestamp']));
+				//echo "ts new: " . $ts . "<Br>";
 
-			if ($ts > $dbreturn[$ctr-1]['timestamp']) {
-				//echo "OHLCurrent > latestDB TS<Br>";
-				$dbreturn[$ctr]['timestamp'] = $ts;
-				$dbreturn[$ctr]['open'] = $ohlcur[0]['open'];
-				$dbreturn[$ctr]['high'] = $ohlcur[0]['high'];
-				$dbreturn[$ctr]['low'] = $ohlcur[0]['low'];
-				$dbreturn[$ctr]['close'] = $ohlcur[0]['close'];
-				$dbreturn[$ctr]['volume'] = $ohlcur[0]['volume'];
-			}
-			else {
-				//echo "don't add...<Br>";
+				if ($ts > $dbreturn[$ctr-1]['timestamp']) {
+					//echo "OHLCurrent > latestDB TS<Br>";
+					$dbreturn[$ctr]['timestamp'] = $ts;
+					$dbreturn[$ctr]['open'] = $ohlcur[0]['open'];
+					$dbreturn[$ctr]['high'] = $ohlcur[0]['high'];
+					$dbreturn[$ctr]['low'] = $ohlcur[0]['low'];
+					$dbreturn[$ctr]['close'] = $ohlcur[0]['close'];
+					$dbreturn[$ctr]['volume'] = $ohlcur[0]['volume'];
+				}
 			}
 
 			echo json_encode( $dbreturn );
 		} 
 		elseif ($dataorg == "highchart") {
-			$ts = $ohlcur[0][0] / 1000;
-			$ts = ($ts - ($ts % 86400)) * 1000;
-			//echo "ts: $ts<Br>";
+			if ($accessOHLCur) {
+				$ts = $ohlcur[0][0] / 1000;
+				$ts = ($ts - ($ts % 86400)) * 1000;
+				//echo "ts: $ts<Br>";
 
-			if ($ts > $dbreturn[$ctr-1][0]) {
-				///echo "OHLCurrent > latestDB TS<Br>";
-				$dbreturn[$ctr][0] = $ts;
-				$dbreturn[$ctr][1] = $ohlcur[0][1];
-				$dbreturn[$ctr][2] = $ohlcur[0][2];
-				$dbreturn[$ctr][3] = $ohlcur[0][3];
-				$dbreturn[$ctr][4] = $ohlcur[0][4];
-				$dbreturn[$ctr][5] = $ohlcur[0][5];
-			}
-			else {
-				//echo "don't add...<Br>";
+				if ($ts > $dbreturn[$ctr-1][0]) {
+					///echo "OHLCurrent > latestDB TS<Br>";
+					$dbreturn[$ctr][0] = $ts;
+					$dbreturn[$ctr][1] = $ohlcur[0][1];
+					$dbreturn[$ctr][2] = $ohlcur[0][2];
+					$dbreturn[$ctr][3] = $ohlcur[0][3];
+					$dbreturn[$ctr][4] = $ohlcur[0][4];
+					$dbreturn[$ctr][5] = $ohlcur[0][5];
+				}
 			}
 
 			echo json_encode($dbreturn);
 		}
 		elseif ($dataorg == "array") {
-			$ts = date('Y-m-d', strtotime($ohlcur[0][0]));
-			//echo "ts new: " . $ts . "<Br>";
+			if ($accessOHLCur) {
+				//echo "company: $company, ";
+				$ts = date('Y-m-d', strtotime($ohlcur[0][0]));
+				//echo "ts new: " . $ts . "<Br>";
 
-			if ($ts > $dbreturn[$ctr-1][0]) {
-				//echo "OHLCurrent > latestDB TS<Br>";
-				$dbreturn[$ctr][0] = $ts;
-				$dbreturn[$ctr][1] = $ohlcur[0][1];
-				$dbreturn[$ctr][2] = $ohlcur[0][2];
-				$dbreturn[$ctr][3] = $ohlcur[0][3];
-				$dbreturn[$ctr][4] = $ohlcur[0][4];
-				$dbreturn[$ctr][5] = $ohlcur[0][5];
-			}
-			else {
-				//echo "don't add...<Br>";
+				if ($ts > $dbreturn[$ctr-1][0]) {
+					//echo "OHLCurrent > latestDB TS<Br>";
+					$dbreturn[$ctr][0] = $ts;
+					$dbreturn[$ctr][1] = $ohlcur[0][1];
+					$dbreturn[$ctr][2] = $ohlcur[0][2];
+					$dbreturn[$ctr][3] = $ohlcur[0][3];
+					$dbreturn[$ctr][4] = $ohlcur[0][4];
+					$dbreturn[$ctr][5] = $ohlcur[0][5];
+				}
 			}
 
 			//echo json_encode($dbreturn);
 			return $dbreturn;
 		}
 		elseif ($dataorg == "array2") {
-			$ts = $ohlcur[0][0] / 1000;
-			$ts = ($ts - ($ts % 86400)) * 1000;
-			//echo "ts: $ts<Br>";
+			if ($accessOHLCur) {
+				$ts = $ohlcur[0][0] / 1000;
+				$ts = ($ts - ($ts % 86400)) * 1000;
+				//echo "ts: $ts<Br>";
 
-			if ($ts > $dbreturn[$ctr-1][0]) {
-				//echo "OHLCurrent > latestDB TS<Br>";
-				$dbreturn[$ctr][0] = $ts;
-				$dbreturn[$ctr][1] = $ohlcur[0][1];
-				$dbreturn[$ctr][2] = $ohlcur[0][2];
-				$dbreturn[$ctr][3] = $ohlcur[0][3];
-				$dbreturn[$ctr][4] = $ohlcur[0][4];
-				$dbreturn[$ctr][5] = $ohlcur[0][5];
-			}
-			else {
-				//echo "don't add...<Br>";
+				if ($ts > $dbreturn[$ctr-1][0]) {
+					//echo "OHLCurrent > latestDB TS<Br>";
+					$dbreturn[$ctr][0] = $ts;
+					$dbreturn[$ctr][1] = $ohlcur[0][1];
+					$dbreturn[$ctr][2] = $ohlcur[0][2];
+					$dbreturn[$ctr][3] = $ohlcur[0][3];
+					$dbreturn[$ctr][4] = $ohlcur[0][4];
+					$dbreturn[$ctr][5] = $ohlcur[0][5];
+				}
 			}
 
 			//echo json_encode($dbreturn);
