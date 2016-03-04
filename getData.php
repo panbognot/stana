@@ -117,6 +117,9 @@
 			case 'array':
 				$dataorg = "array";
 				break;
+			case 'array2':
+				$dataorg = "array2";
+				break;
 			case '3':
 			case 'highchart':
 			case 'highcharts':

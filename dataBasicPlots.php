@@ -273,7 +273,7 @@
 		// reformat the company string
 		$company = str_replace("_", "", $company);
 
-		if ($dataorg == "highchart") {
+		if ( ($dataorg == "highchart") || ($dataorg == "array2") ) {
 			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT
 			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, current 
 					FROM current_prices 
@@ -328,32 +328,44 @@
 		while($row = mysqli_fetch_array($result)) {
 			if ($dataorg == "json") {
 				$dbreturn[$ctr]['timestamp'] = $row['timestamp'];
-				$dbreturn[$ctr]['open'] = $row['open'];
-				$dbreturn[$ctr]['high'] = $row['high'];
-				$dbreturn[$ctr]['low'] = $row['low'];
-				$dbreturn[$ctr]['current'] = $row['current'];
+				$dbreturn[$ctr]['open'] = floatval($row['open']);
+				$dbreturn[$ctr]['high'] = floatval($row['high']);
+				$dbreturn[$ctr]['low'] = floatval($row['low']);
+				$dbreturn[$ctr]['close'] = floatval($row['current']);
+				$dbreturn[$ctr]['volume'] = 0;
 			} 
 			elseif ($dataorg == "highchart") {
 				//echo "[".$row['timestamp'].",".$row['current']."],";
-				$dbreturn[$ctr][0] = $row['timestamp'];
-				$dbreturn[$ctr][1] = $row['open'];
-				$dbreturn[$ctr][2] = $row['high'];
-				$dbreturn[$ctr][3] = $row['low'];
-				$dbreturn[$ctr][4] = $row['current'];
+				$dbreturn[$ctr][0] = doubleval($row['timestamp']);
+				$dbreturn[$ctr][1] = floatval($row['open']);
+				$dbreturn[$ctr][2] = floatval($row['high']);
+				$dbreturn[$ctr][3] = floatval($row['low']);
+				$dbreturn[$ctr][4] = floatval($row['current']);
+				$dbreturn[$ctr][5] = 0;
 			}
 			elseif ($dataorg == "array") {
 				$dbreturn[$ctr][0] = $row['timestamp'];
-				$dbreturn[$ctr][1] = $row['open'];
-				$dbreturn[$ctr][2] = $row['high'];
-				$dbreturn[$ctr][3] = $row['low'];
-				$dbreturn[$ctr][4] = $row['current'];
+				$dbreturn[$ctr][1] = floatval($row['open']);
+				$dbreturn[$ctr][2] = floatval($row['high']);
+				$dbreturn[$ctr][3] = floatval($row['low']);
+				$dbreturn[$ctr][4] = floatval($row['current']);
+				$dbreturn[$ctr][5] = 0;
+			}
+			elseif ($dataorg == "array2") {
+				$dbreturn[$ctr][0] = doubleval($row['timestamp']);
+				$dbreturn[$ctr][1] = floatval($row['open']);
+				$dbreturn[$ctr][2] = floatval($row['high']);
+				$dbreturn[$ctr][3] = floatval($row['low']);
+				$dbreturn[$ctr][4] = floatval($row['current']);
+				$dbreturn[$ctr][5] = 0;
 			}
 			else {
 				$dbreturn[$ctr]['timestamp'] = $row['timestamp'];
-				$dbreturn[$ctr]['open'] = $row['open'];
-				$dbreturn[$ctr]['high'] = $row['high'];
-				$dbreturn[$ctr]['low'] = $row['low'];
-				$dbreturn[$ctr]['current'] = $row['current'];
+				$dbreturn[$ctr]['open'] = floatval($row['open']);
+				$dbreturn[$ctr]['high'] = floatval($row['high']);
+				$dbreturn[$ctr]['low'] = floatval($row['low']);
+				$dbreturn[$ctr]['close'] = floatval($row['current']);
+				$dbreturn[$ctr]['volume'] = 0;
 			}
 
 			$ctr = $ctr + 1;
@@ -362,15 +374,17 @@
 		mysqli_close($con);
 
 		if ($dataorg == "json") {
-			echo json_encode( $dbreturn );
+			//echo json_encode( $dbreturn );
+			return $dbreturn;
 		} 
 		elseif ($dataorg == "highchart") {
-			//echo "[".$temp[0].",".$temp[1]."]]";
 			return $dbreturn;
+			//echo json_encode( $dbreturn );
 		}
-		elseif ($dataorg == "array") {
+		elseif (($dataorg == "array") || ($dataorg == "array2")) {
 			//TODO: create code for organizing an array data output
 			return $dbreturn;
+			//echo json_encode( $dbreturn );
 		}
 		else { //json
 			echo json_encode( $dbreturn );
@@ -416,16 +430,12 @@
 				$dbreturn[$ctr]['volume'] = $row['volume'];
 			} 
 			elseif ($dataorg == "highchart") {
-			  	if ($ctr == 0) {
-			  		echo "[";
-			  	}
-			  	echo "[".$row['timestamp'].",".$row['open'].",".$row['high'].",".$row['low'].",".$row['close'].",".$row['volume']."],";
-			  	$temp[0] = $row['timestamp'];
-			  	$temp[1] = $row['open'];
-			  	$temp[2] = $row['high'];
-			  	$temp[3] = $row['low'];
-			  	$temp[4] = $row['close'];
-			  	$temp[5] = $row['volume'];
+				$dbreturn[$ctr][0] = doubleval($row['timestamp']);
+				$dbreturn[$ctr][1] = floatval($row['open']);
+				$dbreturn[$ctr][2] = floatval($row['high']);
+				$dbreturn[$ctr][3] = floatval($row['low']);
+				$dbreturn[$ctr][4] = floatval($row['close']);
+				$dbreturn[$ctr][5] = intval($row['volume']);
 			}
 			elseif ($dataorg == "array") {
 				$dbreturn[$ctr][0] = $row['timestamp'];
@@ -455,21 +465,103 @@
 			$ctr = $ctr + 1;
 		}
 
+		//get the candlestick for today OHLCurrent
+		$ohlcur = getOHLCurrent($company, $dataorg, $host, $db, $user, $pass);
+
+		//echo json_encode($ohlcur) . "<Br><Br>";
+
+		mysqli_close($con);
+
 		if ($dataorg == "json") {
+			$ts = date('Y-m-d', strtotime($ohlcur[0]['timestamp']));
+			//echo "ts new: " . $ts . "<Br>";
+
+			if ($ts > $dbreturn[$ctr-1]['timestamp']) {
+				//echo "OHLCurrent > latestDB TS<Br>";
+				$dbreturn[$ctr]['timestamp'] = $ts;
+				$dbreturn[$ctr]['open'] = $ohlcur[0]['open'];
+				$dbreturn[$ctr]['high'] = $ohlcur[0]['high'];
+				$dbreturn[$ctr]['low'] = $ohlcur[0]['low'];
+				$dbreturn[$ctr]['close'] = $ohlcur[0]['close'];
+				$dbreturn[$ctr]['volume'] = $ohlcur[0]['volume'];
+			}
+			else {
+				//echo "don't add...<Br>";
+			}
+
 			echo json_encode( $dbreturn );
 		} 
 		elseif ($dataorg == "highchart") {
-			echo "[".$temp[0].",".$temp[1].",".$temp[2].",".$temp[3].",".$temp[4].",".$temp[5]."]]";
+			$ts = $ohlcur[0][0] / 1000;
+			$ts = ($ts - ($ts % 86400)) * 1000;
+			//echo "ts: $ts<Br>";
+
+			if ($ts > $dbreturn[$ctr-1][0]) {
+				///echo "OHLCurrent > latestDB TS<Br>";
+				$dbreturn[$ctr][0] = $ts;
+				$dbreturn[$ctr][1] = $ohlcur[0][1];
+				$dbreturn[$ctr][2] = $ohlcur[0][2];
+				$dbreturn[$ctr][3] = $ohlcur[0][3];
+				$dbreturn[$ctr][4] = $ohlcur[0][4];
+				$dbreturn[$ctr][5] = $ohlcur[0][5];
+			}
+			else {
+				//echo "don't add...<Br>";
+			}
+
+			echo json_encode($dbreturn);
 		}
-		elseif (($dataorg == "array") || ($dataorg == "array2")) {
-			mysqli_close($con);
+		elseif ($dataorg == "array") {
+			$ts = date('Y-m-d', strtotime($ohlcur[0][0]));
+			//echo "ts new: " . $ts . "<Br>";
+
+			if ($ts > $dbreturn[$ctr-1][0]) {
+				//echo "OHLCurrent > latestDB TS<Br>";
+				$dbreturn[$ctr][0] = $ts;
+				$dbreturn[$ctr][1] = $ohlcur[0][1];
+				$dbreturn[$ctr][2] = $ohlcur[0][2];
+				$dbreturn[$ctr][3] = $ohlcur[0][3];
+				$dbreturn[$ctr][4] = $ohlcur[0][4];
+				$dbreturn[$ctr][5] = $ohlcur[0][5];
+			}
+			else {
+				//echo "don't add...<Br>";
+			}
+
+			//echo json_encode($dbreturn);
+			return $dbreturn;
+		}
+		elseif ($dataorg == "array2") {
+			$ts = $ohlcur[0][0] / 1000;
+			$ts = ($ts - ($ts % 86400)) * 1000;
+			//echo "ts: $ts<Br>";
+
+			if ($ts > $dbreturn[$ctr-1][0]) {
+				//echo "OHLCurrent > latestDB TS<Br>";
+				$dbreturn[$ctr][0] = $ts;
+				$dbreturn[$ctr][1] = $ohlcur[0][1];
+				$dbreturn[$ctr][2] = $ohlcur[0][2];
+				$dbreturn[$ctr][3] = $ohlcur[0][3];
+				$dbreturn[$ctr][4] = $ohlcur[0][4];
+				$dbreturn[$ctr][5] = $ohlcur[0][5];
+			}
+			else {
+				//echo "don't add...<Br>";
+			}
+
+			//echo json_encode($dbreturn);
 			return $dbreturn;
 		}
 		else { //json
+			$dbreturn[$ctr]['timestamp'] = $ohlcur['timestamp'];
+			$dbreturn[$ctr]['open'] = $ohlcur['open'];
+			$dbreturn[$ctr]['high'] = $ohlcur['high'];
+			$dbreturn[$ctr]['low'] = $ohlcur['low'];
+			$dbreturn[$ctr]['close'] = $ohlcur['close'];
+			$dbreturn[$ctr]['volume'] = $ohlcur['volume'];
+
 			echo json_encode( $dbreturn );
 		}
-
-	    mysqli_close($con);
 	}
 
 	// returns OHLC for a heikin-ashi candlestick chart
