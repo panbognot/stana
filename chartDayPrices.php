@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Stock Price Plot</title>
+	<title>Stock Day Prices Plot</title>
 
 <?php 
     $serverName = $_SERVER['SERVER_NAME'];
@@ -39,7 +39,7 @@ var testData, testData2;
 
 function plotStock () {
     var company = "<?php echo $company; ?>";
-    dataURL = dynamicDataURL() + "getData.php?company="+company+"&timerange=3y&chart=close&dataorg=highchart";
+    dataURL = dynamicDataURL() + "getData.php?company="+company+"&chart=current&dataorg=highchart";
     $.getJSON(dataURL, function (data) {
     	testData = data;
 
@@ -52,7 +52,7 @@ function plotStock () {
             },
 
             title : {
-                text : company.toUpperCase() + ' Stock Price'
+                text : company.toUpperCase() + ' Day Prices'
             },
 
             series : [{

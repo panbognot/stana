@@ -193,6 +193,10 @@
 				getClose($company, $fromDate, $toDate, $dataorg, 
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				break;
+			case 'current':
+				getCurrentDayPrices($company, $dataorg, 
+					$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+				break;
 			case 'volume':
 				getVolume($company, $fromDate, $toDate, $dataorg, 
 					$mysql_host, $mysql_database, $mysql_user, $mysql_password);

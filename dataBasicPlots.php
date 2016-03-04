@@ -122,6 +122,84 @@
 		mysqli_close($con);
 	}
 
+	// returns the current day prices
+	function getCurrentDayPrices ($company, $dataorg="json", $host, $db, $user, $pass) {
+		// Create connection
+		$con=mysqli_connect($host, $user, $pass, $db);
+		
+		// Check connection
+		if (mysqli_connect_errno()) {
+		  echo "Failed to connect to MySQL: " . mysqli_connect_error();
+		  return;
+		}
+
+		// reformat the company string
+		$company = str_replace("_", "", $company);
+
+		if ($dataorg == "highchart") {
+			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT
+/*			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, close 
+					FROM $company 
+					WHERE timestamp >= '".$from."' AND timestamp <= '".$to."' ORDER BY timestamp ASC";*/
+
+			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, current 
+					FROM current_prices 
+					WHERE company = '".$company."' AND timestamp > curdate() ORDER BY timestamp ASC";
+		} else {
+/*			$sql = "SELECT DATE_FORMAT(timestamp, '%Y-%m-%d') as timestamp, close 
+					FROM $company 
+					WHERE timestamp >= '".$from."' AND timestamp <= '".$to."' ORDER BY timestamp ASC";*/
+
+			$sql = "SELECT timestamp, current 
+					FROM current_prices 
+					WHERE company = '".$company."' AND timestamp > curdate() ORDER BY timestamp ASC";
+		}
+
+		$result = mysqli_query($con, $sql);
+
+		$dbreturn = "";
+		$ctr = 0;
+		$temp;
+		while($row = mysqli_fetch_array($result)) {
+			  if ($dataorg == "json") {
+				  $dbreturn[$ctr]['timestamp'] = $row['timestamp'];
+				  $dbreturn[$ctr]['current'] = $row['current'];
+			  } 
+			  elseif ($dataorg == "highchart") {
+			  	if ($ctr == 0) {
+			  		echo "[";
+			  	}
+			  	echo "[".$row['timestamp'].",".$row['current']."],";
+			  	$temp[0] = $row['timestamp'];
+			  	$temp[1] = $row['current'];
+			  }
+			  elseif ($dataorg == "array") {
+			  	//TODO: create code for organizing an array data output
+			  }
+			  else {
+				  $dbreturn[$ctr]['timestamp'] = $row['timestamp'];
+				  $dbreturn[$ctr]['current'] = $row['current'];
+			  }
+
+			  $ctr = $ctr + 1;
+		}
+
+		if ($dataorg == "json") {
+			echo json_encode( $dbreturn );
+		} 
+		elseif ($dataorg == "highchart") {
+			echo "[".$temp[0].",".$temp[1]."]]";
+		}
+		elseif ($dataorg == "array") {
+		//TODO: create code for organizing an array data output
+		}
+		else { //json
+			echo json_encode( $dbreturn );
+		}
+
+		mysqli_close($con);
+	}
+
 	// returns only the volume traded
 	function getVolume ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
 		// Create connection
