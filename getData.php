@@ -89,8 +89,21 @@
 		$toDate = date_format($toDate,"Y-m-d");
 	}
 
+	//get all current price
+	if (isset($_GET['allcur'])) {
+		if (isset($_GET['lastupdate'])) {
+			$lastupdate = $_GET['lastupdate'];
+
+			getAllCurrentDayPrices($lastupdate, $mysql_host, $mysql_database, $mysql_user, $mysql_password);
+			return;
+		}
+		else {
+			echo "ERROR: No data for lastupdate<Br>";
+			return;
+		}
+	}
 	//select the company you want to view
-	if(isset($_GET['company'])) {
+	elseif(isset($_GET['company'])) {
 		$company = $_GET['company']."_";
 		debug_print("selected company: ".$_GET['company']."<Br/>");	
 	}

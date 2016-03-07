@@ -192,6 +192,38 @@
 		mysqli_close($con);
 	}
 
+	// returns all current day prices
+	// $lastupdate should be of format Y-m-d H:M:S
+	function getAllCurrentDayPrices ($lastupdate, $host, $db, $user, $pass) {
+		// Create connection
+		$con=mysqli_connect($host, $user, $pass, $db);
+		
+		// Check connection
+		if (mysqli_connect_errno()) {
+		  echo "Failed to connect to MySQL: " . mysqli_connect_error();
+		  return;
+		}
+
+		$sql = "SELECT * FROM current_prices WHERE timestamp > '$lastupdate' ORDER BY entryid ASC";
+		//}
+
+		$result = mysqli_query($con, $sql);
+
+		$dbreturn = "";
+		$ctr = 0;
+		$temp;
+		while($row = mysqli_fetch_array($result)) {
+			//$dbreturn[$ctr]['entryid'] = $row['entryid'];
+			$dbreturn[$ctr]['timestamp'] = $row['timestamp'];
+			$dbreturn[$ctr]['company'] = $row['company'];
+			$dbreturn[$ctr++]['current'] = $row['current'];
+		}
+
+		echo json_encode($dbreturn);
+
+		mysqli_close($con);
+	}
+
 	// returns only the volume traded
 	function getVolume ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
 		// Create connection
