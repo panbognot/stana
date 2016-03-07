@@ -487,18 +487,21 @@
 				break;
 			case 'highchart':
 				$latestTS = $dbreturn[$ctr-1][0];
+				$dateToday = date('U') * 1000;
 				break;
 			case 'array':
 				$latestTS = $dbreturn[$ctr-1][0];
 				break;
 			case 'array2':
 				$latestTS = $dbreturn[$ctr-1][0];
+				$dateToday = date('U') * 1000;
 				break;
 			default:
 				$latestTS = $dbreturn[$ctr-1]['timestamp'];
 				break;
 		}
 
+		//echo "after switch. Date Today: $dateToday, Latest: $latestTS<Br>";
 		if ( ($dateToday > $latestTS) && !isWeekend($dateToday) ) {
 			$accessOHLCur = true;
 			//get the candlestick for today OHLCurrent
@@ -510,10 +513,10 @@
 		if ($dataorg == "json") {
 			if ($accessOHLCur) {
 				$ts = date('Y-m-d', strtotime($ohlcur[0]['timestamp']));
-				//echo "ts new: " . $ts . "<Br>";
+				//echo "json ts new: " . $ts . "<Br>";
 
 				if ($ts > $dbreturn[$ctr-1]['timestamp']) {
-					//echo "OHLCurrent > latestDB TS<Br>";
+					//echo "json OHLCurrent > latestDB TS<Br>";
 					$dbreturn[$ctr]['timestamp'] = $ts;
 					$dbreturn[$ctr]['open'] = $ohlcur[0]['open'];
 					$dbreturn[$ctr]['high'] = $ohlcur[0]['high'];
@@ -526,13 +529,14 @@
 			echo json_encode( $dbreturn );
 		} 
 		elseif ($dataorg == "highchart") {
+			//echo "highchart<Br>";
 			if ($accessOHLCur) {
 				$ts = $ohlcur[0][0] / 1000;
 				$ts = ($ts - ($ts % 86400)) * 1000;
-				//echo "ts: $ts<Br>";
+				//echo "highchart ts: $ts<Br>";
 
 				if ($ts > $dbreturn[$ctr-1][0]) {
-					///echo "OHLCurrent > latestDB TS<Br>";
+					//echo "highchart OHLCurrent > latestDB TS<Br>";
 					$dbreturn[$ctr][0] = $ts;
 					$dbreturn[$ctr][1] = $ohlcur[0][1];
 					$dbreturn[$ctr][2] = $ohlcur[0][2];
@@ -548,10 +552,10 @@
 			if ($accessOHLCur) {
 				//echo "company: $company, ";
 				$ts = date('Y-m-d', strtotime($ohlcur[0][0]));
-				//echo "ts new: " . $ts . "<Br>";
+				//echo "array ts new: " . $ts . "<Br>";
 
 				if ($ts > $dbreturn[$ctr-1][0]) {
-					//echo "OHLCurrent > latestDB TS<Br>";
+					//echo "array OHLCurrent > latestDB TS<Br>";
 					$dbreturn[$ctr][0] = $ts;
 					$dbreturn[$ctr][1] = $ohlcur[0][1];
 					$dbreturn[$ctr][2] = $ohlcur[0][2];
@@ -568,10 +572,10 @@
 			if ($accessOHLCur) {
 				$ts = $ohlcur[0][0] / 1000;
 				$ts = ($ts - ($ts % 86400)) * 1000;
-				//echo "ts: $ts<Br>";
+				//echo "array2 ts: $ts<Br>";
 
 				if ($ts > $dbreturn[$ctr-1][0]) {
-					//echo "OHLCurrent > latestDB TS<Br>";
+					//echo "array2 OHLCurrent > latestDB TS<Br>";
 					$dbreturn[$ctr][0] = $ts;
 					$dbreturn[$ctr][1] = $ohlcur[0][1];
 					$dbreturn[$ctr][2] = $ohlcur[0][2];
