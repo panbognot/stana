@@ -5,15 +5,6 @@
 	function getSMA_sub_real ($company, $from="1900-01-01 00:00:00", $to=null, 
 					$dataorg="json", $samplePeriod=15, $enSignals=false,
 					$host, $db, $user, $pass) {
-		// Create connection
-		$con=mysqli_connect($host, $user, $pass, $db);
-		
-		// Check connection
-		if (mysqli_connect_errno()) {
-		  echo "Failed to connect to MySQL: " . mysqli_connect_error();
-		  return;
-		}
-
 		$intervalPeriod = $samplePeriod * 1.5;
 		//from date has to be adjusted for the bollinger bands
 		$date = date_create($from);
