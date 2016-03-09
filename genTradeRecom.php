@@ -5,6 +5,8 @@
 	require_once('dataBollinger.php');
 	require_once('dataAccountManagement.php');
 
+	set_time_limit(60);
+
 	$toDate;
 	$fromDate;
 	$dataorg = "json";
