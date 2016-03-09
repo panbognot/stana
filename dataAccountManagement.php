@@ -1,6 +1,7 @@
 <?php 
 	require_once('dataBasicPlots.php');
 	require_once('codesword_trade_signals.php');
+	require_once('codesword_sma.php');
 
 	function tableExists($con, $table) {
 	    $sql = "SHOW TABLES LIKE '$table'";

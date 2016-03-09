@@ -193,7 +193,7 @@
 	}
 
 	// returns all current day prices
-	// $lastupdate should be of format Y-m-d H:M:S
+	// $lastupdate should be of format Y-m-d+H:M:S
 	function getAllCurrentDayPrices ($lastupdate, $host, $db, $user, $pass) {
 		// Create connection
 		$con=mysqli_connect($host, $user, $pass, $db);
