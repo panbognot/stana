@@ -5,7 +5,7 @@
 	require_once('dataBollinger.php');
 	require_once('dataAccountManagement.php');
 
-	set_time_limit(60);
+	set_time_limit(120);
 
 	$toDate;
 	$fromDate;
@@ -133,7 +133,7 @@
 
 	//echo json_encode($curMonthSignals);
 
-	//segrate the signals into buy and sell categories
+	//segregate the signals into buy and sell categories
 	$filteredBuys = [];
 	$filteredSells = [];
 	$ctrBuy = $ctrSell = 0;
@@ -146,10 +146,22 @@
 		}
 	}
 
+	//Sort according to date
+	function date_compare($a, $b)
+	{
+		//The timestamp is the zeroth element
+	    $t1 = strtotime($a[0]);
+	    $t2 = strtotime($b[0]);
+	    return $t2 - $t1;
+	}    
+	usort($filteredBuys, 'date_compare');
+	usort($filteredSells, 'date_compare');
+
 	//Display the Buy Recommendations
 	echo "Buy Signals for the Past $days days :<Br><Br>";
 	foreach ($filteredBuys as $buys) {
-		echo "Company: ".$buys[count($buys) - 1].", date: ".$buys[0]."<Br>";
+		$name = str_replace("_", "", $buys[count($buys) - 1]);
+		echo "Company: ".$name.", date: ".$buys[0]."<Br>";
 	}
 
 	echo "<Br><Br>";
@@ -157,6 +169,7 @@
 	//Display the Sell Recommendations
 	echo "Sell Signals for the Past month:<Br><Br>";
 	foreach ($filteredSells as $sells) {
-		echo "Company: ".$sells[count($sells) - 1].", date: ".$sells[0]."<Br>";
+		$name = str_replace("_", "", $sells[count($sells) - 1]);
+		echo "Company: ".$name.", date: ".$sells[0]."<Br>";
 	}
 ?>

@@ -307,9 +307,9 @@
 
 		if ( ($dataorg == "highchart") || ($dataorg == "array2") ) {
 			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT
-			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, current 
+/*			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, current 
 					FROM current_prices 
-					WHERE company = '".$company."' AND timestamp > curdate() ORDER BY timestamp ASC";
+					WHERE company = '".$company."' AND timestamp > curdate() ORDER BY timestamp ASC";*/
 
 			$sql = "SELECT 
 						(SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) 
