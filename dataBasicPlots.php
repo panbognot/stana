@@ -307,49 +307,15 @@
 
 		if ( ($dataorg == "highchart") || ($dataorg == "array2") ) {
 			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT
-/*			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, current 
-					FROM current_prices 
-					WHERE company = '".$company."' AND timestamp > curdate() ORDER BY timestamp ASC";*/
-
 			$sql = "SELECT 
-						(SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) 
-							FROM current_prices 
-							WHERE company = '$company' 
-							ORDER BY timestamp DESC LIMIT 1) AS timestamp,
-						ROUND((SELECT current 
-							FROM current_prices 
-							WHERE company = '$company' 
-							AND timestamp > curdate()  
-							ORDER BY timestamp ASC LIMIT 1),4) AS open, 
-						ROUND(max(current),4) AS high, 
-						ROUND(min(current),4) AS low, 
-						ROUND((SELECT current 
-							FROM current_prices 
-							WHERE company = '$company' 
-							AND timestamp > curdate()  
-							ORDER BY timestamp DESC LIMIT 1),4) AS current
-					FROM current_prices 
+						(UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, 
+						open, high, low, close 
+					FROM current_ohlc 
 					WHERE company = '$company' AND timestamp > curdate() ";
 		} else {
-			$sql = "SELECT 
-						(SELECT timestamp 
-							FROM current_prices 
-							WHERE company = '$company' 
-							ORDER BY timestamp DESC LIMIT 1) AS timestamp,
-						ROUND((SELECT current 
-							FROM current_prices 
-							WHERE company = '$company' 
-							AND timestamp > curdate()  
-							ORDER BY timestamp ASC LIMIT 1),4) AS open, 
-						ROUND(max(current),4) AS high, 
-						ROUND(min(current),4) AS low, 
-						ROUND((SELECT current 
-							FROM current_prices 
-							WHERE company = '$company' 
-							AND timestamp > curdate()  
-							ORDER BY timestamp DESC LIMIT 1),4) AS current
-					FROM current_prices 
-					WHERE company = '$company' AND timestamp > curdate() ";
+			$sql = "SELECT timestamp, open, high, low, close 
+					FROM current_ohlc 
+					WHERE company = '$company' AND timestamp > curdate()";
 		}
 
 		$result = mysqli_query($con, $sql);
@@ -363,16 +329,15 @@
 				$dbreturn[$ctr]['open'] = floatval($row['open']);
 				$dbreturn[$ctr]['high'] = floatval($row['high']);
 				$dbreturn[$ctr]['low'] = floatval($row['low']);
-				$dbreturn[$ctr]['close'] = floatval($row['current']);
+				$dbreturn[$ctr]['close'] = floatval($row['close']);
 				$dbreturn[$ctr]['volume'] = 0;
 			} 
 			elseif ($dataorg == "highchart") {
-				//echo "[".$row['timestamp'].",".$row['current']."],";
 				$dbreturn[$ctr][0] = doubleval($row['timestamp']);
 				$dbreturn[$ctr][1] = floatval($row['open']);
 				$dbreturn[$ctr][2] = floatval($row['high']);
 				$dbreturn[$ctr][3] = floatval($row['low']);
-				$dbreturn[$ctr][4] = floatval($row['current']);
+				$dbreturn[$ctr][4] = floatval($row['close']);
 				$dbreturn[$ctr][5] = 0;
 			}
 			elseif ($dataorg == "array") {
@@ -380,7 +345,7 @@
 				$dbreturn[$ctr][1] = floatval($row['open']);
 				$dbreturn[$ctr][2] = floatval($row['high']);
 				$dbreturn[$ctr][3] = floatval($row['low']);
-				$dbreturn[$ctr][4] = floatval($row['current']);
+				$dbreturn[$ctr][4] = floatval($row['close']);
 				$dbreturn[$ctr][5] = 0;
 			}
 			elseif ($dataorg == "array2") {
@@ -388,7 +353,7 @@
 				$dbreturn[$ctr][1] = floatval($row['open']);
 				$dbreturn[$ctr][2] = floatval($row['high']);
 				$dbreturn[$ctr][3] = floatval($row['low']);
-				$dbreturn[$ctr][4] = floatval($row['current']);
+				$dbreturn[$ctr][4] = floatval($row['close']);
 				$dbreturn[$ctr][5] = 0;
 			}
 			else {
@@ -396,7 +361,7 @@
 				$dbreturn[$ctr]['open'] = floatval($row['open']);
 				$dbreturn[$ctr]['high'] = floatval($row['high']);
 				$dbreturn[$ctr]['low'] = floatval($row['low']);
-				$dbreturn[$ctr]['close'] = floatval($row['current']);
+				$dbreturn[$ctr]['close'] = floatval($row['close']);
 				$dbreturn[$ctr]['volume'] = 0;
 			}
 
@@ -538,6 +503,12 @@
 			$accessOHLCur = true;
 			//get the candlestick for today OHLCurrent
 			$ohlcur = getOHLCurrent($company, $dataorg, $host, $db, $user, $pass);
+			//echo json_encode($ohlcur);
+
+			if ($ohlcur == "") {
+				$accessOHLCur = false;
+				//echo "Returned OHLCurrent is empty. ";
+			}
 		}
 
 		mysqli_close($con);
