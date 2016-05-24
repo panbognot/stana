@@ -161,7 +161,7 @@
 	echo "Buy Signals for the Past $days days :<Br><Br>";
 	foreach ($filteredBuys as $buys) {
 		$name = str_replace("_", "", $buys[count($buys) - 1]);
-		echo "Company: ".$name.", date: ".$buys[0]."<Br>";
+		echo "Company: ".strtoupper($name).", date: ".$buys[0]."<Br>";
 	}
 
 	echo "<Br><Br>";
@@ -170,6 +170,6 @@
 	echo "Sell Signals for the Past month:<Br><Br>";
 	foreach ($filteredSells as $sells) {
 		$name = str_replace("_", "", $sells[count($sells) - 1]);
-		echo "Company: ".$name.", date: ".$sells[0]."<Br>";
+		echo "Company: ".strtoupper($name).", date: ".$sells[0]."<Br>";
 	}
 ?>
