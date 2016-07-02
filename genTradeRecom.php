@@ -131,11 +131,17 @@
 		}
 	}
 
-	//echo json_encode($curMonthSignals);
+	// echo json_encode($curMonthSignals);
 
 	//segregate the signals into buy and sell categories
 	$filteredBuys = [];
 	$filteredSells = [];
+
+	$filteredSignals = [];
+	$filteredSignals["type"] = $type;
+	$filteredSignals["buys"] = [];
+	$filteredSignals["sells"] = [];
+
 	$ctrBuy = $ctrSell = 0;
 	foreach ($curMonthSignals as $signal) {
 		if ($signal[1] == "buy") {
@@ -162,6 +168,10 @@
 	foreach ($filteredBuys as $buys) {
 		$name = str_replace("_", "", $buys[count($buys) - 1]);
 		echo "Company: ".$name.", date: ".$buys[0]."<Br>";
+
+		$tempSignal["timestamp"] = $buys[0];
+		$tempSignal["company"] = $name;
+		array_push($filteredSignals["buys"], $tempSignal);
 	}
 
 	echo "<Br><Br>";
@@ -171,5 +181,16 @@
 	foreach ($filteredSells as $sells) {
 		$name = str_replace("_", "", $sells[count($sells) - 1]);
 		echo "Company: ".$name.", date: ".$sells[0]."<Br>";
+
+		$tempSignal["timestamp"] = $sells[0];
+		$tempSignal["company"] = $name;
+		array_push($filteredSignals["sells"], $tempSignal);
 	}
+
+	$signalsJSON = json_encode($filteredSignals);
+
+	$fileName = "recomm_" . $type . ".json";
+	$file = fopen("output/" . $fileName, "w");
+	fwrite($file, $signalsJSON);
+	fclose($file);
 ?>
