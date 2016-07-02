@@ -66,6 +66,8 @@
 	</div>
 </body>
 <script id="chart-template" type="text/x-handlebars-template">
+{{#if this}}
+
 	{{#each recommendations}}
 	    <div id="chart-{{company}}" class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
 			<h3>{{#uppercase}} {{company}} {{/uppercase}}</h3> 
@@ -95,6 +97,9 @@
 			</div>
 	    </div>
 	{{/each}}
+{{else}}
+	<h1>No Data Found! Running Trade Recommendation Generator Script</h1>
+{{/if}}
 </script>
 
 <script type="text/javascript">
@@ -111,10 +116,10 @@
 	var chartTemplate = Handlebars.compile(chartTemplateScript);
 
 	//Read the pre computed stock recommendations
-	var context;
+	var context, genRecomm, rawFile;
 	function readTextFile(file)
 	{
-	    var rawFile = new XMLHttpRequest();
+	    rawFile = new XMLHttpRequest();
 	    rawFile.open("GET", file, false);
 	    rawFile.onreadystatechange = function ()
 	    {
@@ -125,6 +130,14 @@
 	                var allText = rawFile.responseText;
 	                context = JSON.parse(rawFile.responseText);
 	            }
+	            else if (rawFile.status === 404) {
+				    //TODO: run the PHP trade recommendation script
+				    console.log("No trade recommendation file detected.");
+				    genRecomm = "genTradeRecom.php?type=<?php echo $type; ?>";
+				    $.ajax({url: genRecomm, success: function(result){
+				        console.log("successfully run the gen trade recommendation script");
+				    }});
+	            };
 	        }
 	    }
 	    rawFile.send(null);
