@@ -24,36 +24,72 @@
 		}
 	}
 
-	if(isset($_GET['days'])) {
-		$days = (int)($_GET['days']);
-	}
-	else {
-		$days = 5;
-	}
+	// echo "# of arguments from CLI: " . count($argv) . "\n";
 
-	if(isset($_GET['type'])) {
-		$type = $_GET['type'];
+	if (count($argv) > 1) {
+		if($argv[1]) {
+			$type = $argv[1];
 
-		switch ($type) {
-		    case "smac":
-		        echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
-		        break;
-		    case "bb3":
-		        echo "BOLLINGER BANDS 3 <Br><Br>";
-		        $delta = "3 months";
-		        break;
-		    case "stomacd":
-		        echo "STOCHASTIC and MACD COMBINED <Br><Br>";
-		        $delta = "3 months";
-		        break;
-		    default:
-		        $type = "smac";
-		        echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
+			switch ($type) {
+			    case "smac":
+			        echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
+			        break;
+			    case "bb3":
+			        echo "BOLLINGER BANDS 3 <Br><Br>";
+			        $delta = "3 months";
+			        break;
+			    case "stomacd":
+			        echo "STOCHASTIC and MACD COMBINED <Br><Br>";
+			        $delta = "3 months";
+			        break;
+			    default:
+			        $type = "smac";
+			        echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
+			}
 		}
-	}
-	else {
-		echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
-		$type = "smac";
+		else {
+			echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
+			$type = "smac";
+		}
+		
+		if($argv[2]) {
+			$days = $argv[2];
+		}
+		else {
+			$days = 5;
+		}
+	} else {
+		if(isset($_GET['days'])) {
+			$days = (int)($_GET['days']);
+		}
+		else {
+			$days = 5;
+		}
+
+		if(isset($_GET['type'])) {
+			$type = $_GET['type'];
+
+			switch ($type) {
+			    case "smac":
+			        echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
+			        break;
+			    case "bb3":
+			        echo "BOLLINGER BANDS 3 <Br><Br>";
+			        $delta = "3 months";
+			        break;
+			    case "stomacd":
+			        echo "STOCHASTIC and MACD COMBINED <Br><Br>";
+			        $delta = "3 months";
+			        break;
+			    default:
+			        $type = "smac";
+			        echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
+			}
+		}
+		else {
+			echo "SIMPLE MOVING AVERAGE COMBINED <Br><Br>";
+			$type = "smac";
+		}
 	}
 
 	function getTimeRange($deltaTime) {
