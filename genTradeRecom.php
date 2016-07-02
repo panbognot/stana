@@ -139,8 +139,7 @@
 
 	$filteredSignals = [];
 	$filteredSignals["type"] = $type;
-	$filteredSignals["buys"] = [];
-	$filteredSignals["sells"] = [];
+	$filteredSignals["recommendations"] = [];
 
 	$ctrBuy = $ctrSell = 0;
 	foreach ($curMonthSignals as $signal) {
@@ -171,7 +170,8 @@
 
 		$tempSignal["timestamp"] = $buys[0];
 		$tempSignal["company"] = $name;
-		array_push($filteredSignals["buys"], $tempSignal);
+		$tempSignal["isbuy"] = true;
+		array_push($filteredSignals["recommendations"], $tempSignal);
 	}
 
 	echo "<Br><Br>";
@@ -184,7 +184,8 @@
 
 		$tempSignal["timestamp"] = $sells[0];
 		$tempSignal["company"] = $name;
-		array_push($filteredSignals["sells"], $tempSignal);
+		$tempSignal["isbuy"] = false;
+		array_push($filteredSignals["recommendations"], $tempSignal);
 	}
 
 	$signalsJSON = json_encode($filteredSignals);

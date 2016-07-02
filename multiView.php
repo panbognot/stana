@@ -29,36 +29,6 @@
 	<!-- Bootstrap CSS -->
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 </head>
-<body>
-	<div class="container-fluid">
-	  <div class="row">
-	    <p><b>Multiview Stock Recommendations</b></p> 
-	  </div>
-	  <div id="multi-view-recommendations" class="row">
-<!-- 	    <div id="chart1" class="col-sm-3">
-	      <h3>Column 1</h3>
-	      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-	      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-	    </div>
-	    <div class="col-sm-3">
-	      <h3>Column 2</h3>
-	      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-	      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-	    </div>
-	    <div class="col-sm-3">
-	      <h3>Column 3</h3> 
-	      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-	      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-	    </div>
-	    <div class="col-sm-3">
-	      <h3>Column 4</h3> 
-	      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-	      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-	    </div> -->
-	  </div>
-	</div>
-</body>
-
 <?php
     //select the company you want to view
     if(isset($_GET['company'])) {
@@ -68,17 +38,42 @@
         //echo "ERROR: No Company was selected<Br/>";
         $company = "smc";
     }
-?>
 
+	if(isset($_GET['type'])) {
+		$type = $_GET['type'];
+
+		switch ($type) {
+		    case "smac":
+		    case "bb3":
+		    case "stomacd":
+		        break;
+		    default:
+		        $type = "smac";
+		}
+	}
+	else {
+		$type = "smac";
+	}
+?>
+<body>
+	<div class="container-fluid">
+	  <div class="row">
+	    <p id="page-title"><b>Multiview Stock Recommendations (<?php echo strtoupper($type); ?>)</b></p> 
+	  </div>
+	  <div id="multi-view-recommendations" class="row">
+
+	  </div>
+	</div>
+</body>
 <script id="chart-template" type="text/x-handlebars-template">
 	{{#each recommendations}}
-	    <div id="chart-{{company}}" class="col-sm-3">
+	    <div id="chart-{{company}}" class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
 			<h3>{{#uppercase}} {{company}} {{/uppercase}}</h3> 
 			
 			{{#if isbuy}}
-				<p class="bg-success">BUY Recommendation</p>
+				<p class="bg-success">BUY Recommendation ({{timestamp}})</p>
 			{{else}}
-				<p class="bg-danger">SELL Recommendation</p>
+				<p class="bg-danger">SELL Recommendation ({{timestamp}})</p>
 			{{/if}}
 			
 			<div id="chart-{{company}}-canvas">
@@ -115,41 +110,28 @@
 	// Compile the template
 	var chartTemplate = Handlebars.compile(chartTemplateScript);
 
-	// Define our data object
-	var context = {
-		recommendations: [
-			{
-				"company":"smc",
-				"timestamp":"2016-07-01 18:00",
-				"isbuy":true
-			},
-			{
-				"company":"ltg",
-				"timestamp":"2016-07-01 18:00",
-				"isbuy":true
-			},
-			{
-				"company":"tel",
-				"timestamp":"2016-07-01 18:00",
-				"isbuy":false
-			},
-			{
-				"company":"glo",
-				"timestamp":"2016-07-01 18:00",
-				"isbuy":false
-			},
-			{
-				"company":"ceb",
-				"timestamp":"2016-07-01 18:00",
-				"isbuy":true
-			},
-			{
-				"company":"ssi",
-				"timestamp":"2016-07-01 18:00",
-				"isbuy":false
-			}
-		]
-	};
+	//Read the pre computed stock recommendations
+	var context;
+	function readTextFile(file)
+	{
+	    var rawFile = new XMLHttpRequest();
+	    rawFile.open("GET", file, false);
+	    rawFile.onreadystatechange = function ()
+	    {
+	        if(rawFile.readyState === 4)
+	        {
+	            if(rawFile.status === 200 || rawFile.status == 0)
+	            {
+	                var allText = rawFile.responseText;
+	                context = JSON.parse(rawFile.responseText);
+	            }
+	        }
+	    }
+	    rawFile.send(null);
+	}
+
+	var fileRecomm = "output/recomm_" + "<?php echo $type; ?>" + ".json";
+	readTextFile(fileRecomm);
 
 	// Pass our data to the template
 	var chartCompiledHtml = chartTemplate(context);
@@ -165,7 +147,7 @@
 	    var targetID = "#chart-" + company + "-canvas";
 	    var ohlc = [];      
 
-	    bollinger2URL = dynamicDataURL() + 'getData.php?company='+company+'&timerange=3y&chart=bollinger3&dataorg=highchart&ensig=true';
+	    bollinger2URL = dynamicDataURL() + 'getData.php?company='+company+'&timerange=1y&chart=bollinger3&dataorg=highchart&ensig=true';
 	    $.getJSON(bollinger2URL, function (data) {
 	    	testData = data;
 	        var allData = data;
@@ -244,7 +226,7 @@
 	        // Create the chart
 	        $(targetID).highcharts('StockChart', {
 	            rangeSelector : {
-	                selected : 2
+	                selected : 1
 	            },
 
 	            title : {
@@ -306,6 +288,9 @@
 
 	}
 
-	plotStock();
+	var list = context.recommendations;
+	for (i in list) {
+		plotStock(list[i].company);
+	}
 </script>
 </html>
