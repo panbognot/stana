@@ -28,7 +28,7 @@
 <?php
     //select the company you want to view
     if(isset($_GET['company'])) {
-        $company = $_GET['company']."";
+        $company = strtolower($_GET['company']."");
     }
     else {
         //echo "ERROR: No Company was selected<Br/>";
@@ -43,7 +43,7 @@ function plotStock () {
     var company = "<?php echo $company; ?>";
     var ohlc = [];
 
-    var timerange = '3y';
+    var timerange = '10y';
 
     macdURL = dynamicDataURL() + 'getData.php?company='+company+
             '&timerange='+timerange+'&chart=macd&dataorg=highchart';

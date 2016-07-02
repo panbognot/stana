@@ -18,7 +18,7 @@
 		$dbreturn = "";
 		$ctr = 0;
 		while($row = mysqli_fetch_array($result)) {
-			$dbreturn[$ctr++] = $row['quote'];
+			$dbreturn[$ctr++] = strtolower($row['quote']);
 		}
 		//echo json_encode( $dbreturn );
 
@@ -46,7 +46,7 @@
 		$ctr = 0;
 		$temp;
 		while($row = mysqli_fetch_array($result)) {
-			$dbreturn[$ctr] = $row['quote'];
+			$dbreturn[$ctr] = strtolower($row['quote']);
 
 			$ctr = $ctr + 1;
 		}
