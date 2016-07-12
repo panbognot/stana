@@ -140,7 +140,7 @@
 	                	};
 	                	base_link = base_link + "/chartEntryFinder.php?company=";
 	                } else {
-	                	base_link = location.hostname + "/chartEntryFinder.php?company=";
+	                	base_link = "http://" + location.hostname + "/chartEntryFinder.php?company=";
 	                }
 
 	                for (var i = context.recommendations.length - 1; i >= 0; i--) {
