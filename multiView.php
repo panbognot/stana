@@ -70,7 +70,7 @@
 
 	{{#each recommendations}}
 	    <div id="chart-{{company}}" class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-			<h3>{{#uppercase}} {{company}} {{/uppercase}}</h3> 
+			<h3><a href="{{link}}">{{#uppercase}} {{company}} {{/uppercase}}</a></h3> 
 			
 			{{#if isbuy}}
 				<p class="bg-success">BUY Recommendation ({{timestamp}})</p>
@@ -129,6 +129,23 @@
 	            {
 	                var allText = rawFile.responseText;
 	                context = JSON.parse(rawFile.responseText);
+
+	                var base_link;
+	                var pathArray = location.pathname.split( '/' );
+	                if (pathArray.length > 2) {
+	                	base_link = "http://" + location.hostname;
+
+	                	for (var i = 1; i < pathArray.length -1; i++) {
+	                		base_link = base_link + "/" + pathArray[i];
+	                	};
+	                	base_link = base_link + "/chartEntryFinder.php?company=";
+	                } else {
+	                	base_link = location.hostname + "/chartEntryFinder.php?company=";
+	                }
+
+	                for (var i = context.recommendations.length - 1; i >= 0; i--) {
+	                	context.recommendations[i].link = base_link + context.recommendations[i].company;
+	                };
 	            }
 	            else if (rawFile.status === 404) {
 				    //TODO: run the PHP trade recommendation script
