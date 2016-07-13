@@ -55,6 +55,39 @@
 		mysqli_close($con);
 	}
 
+	// generate the names of all the companies
+	function getTopGainers ($host, $db, $user, $pass, $limit = 25) {
+		// Create connection
+		$con=mysqli_connect($host, $user, $pass, $db);
+		
+		// Check connection
+		if (mysqli_connect_errno()) {
+		  echo "Failed to connect to MySQL: " . mysqli_connect_error();
+		  return;
+		}
+
+		$sql = "SELECT timestamp, company, percentage
+				FROM current_gainers
+				WHERE timestamp = 
+					( SELECT MAX( timestamp ) FROM current_gainers ) 
+				ORDER BY percentage DESC 
+				LIMIT $limit";
+		$result = mysqli_query($con, $sql);
+
+		$dbreturn = "";
+		$ctr = 0;
+		while($row = mysqli_fetch_array($result)) {
+			$dbreturn[$ctr]['timestamp'] = strtolower($row['timestamp']);
+			$dbreturn[$ctr]['company'] = strtolower($row['company']);
+			$dbreturn[$ctr++]['percentage'] = strtolower($row['percentage']);
+		}
+		//echo json_encode( $dbreturn );
+
+		mysqli_close($con);
+
+		return $dbreturn;
+	}
+
 	// returns only the closing price
 	function getClose ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
 		// Create connection
