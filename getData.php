@@ -12,6 +12,9 @@
 	require_once('dataBollinger.php');
 	require_once('dataAccountManagement.php');
 
+	//combined from SMA and ATR
+	require_once('dataSMAentryATRstop.php');
+
 	//initialize variables
 	$debug_mode = false;
 	$toDate;
@@ -249,6 +252,17 @@
 				if(isset($_GET['period'])) {
 					$period = $_GET['period'];
 					getSMA($company, $fromDate, $toDate, $dataorg, $period, $ensig,
+						true,
+						$mysql_host, $mysql_database, $mysql_user, $mysql_password);
+				}
+				else {
+					echo "Error: No period selected";
+				}
+				break;
+			case 'smaentryatrstop':
+				if(isset($_GET['period'])) {
+					$period = $_GET['period'];
+					getSMAentryATRstop($company, $fromDate, $toDate, $dataorg, $period, $ensig,
 						true,
 						$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				}

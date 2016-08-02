@@ -77,7 +77,7 @@
 	// real - [timestamp, close price]
 	// sma - [timestamp, sma]
 	// Returns - [timestamp, signal]
-	function codesword_smaBuySellSignal($real, $sma) {
+	function codesword_smaBuySellSignal($real, $sma, $isBuyOnly = false) {
 		$diff = 0;
 		$ctr = 0;
 
