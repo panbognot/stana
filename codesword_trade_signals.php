@@ -98,12 +98,12 @@
 	//			given time of the trade.
 	function codesword_smaEntryATRstopTradeDetector($ohlc, $smaBuy, $atr, $riskFactor = 2, $profitFactor = 4) {
 		// echo "OHLC:" . json_encode($ohlc) . "<Br/><Br/>";
-		echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
+		// echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
 		// echo "ATR:" . json_encode($atr) . "<Br/><Br/>";
 
 		$numBuySignals = count($smaBuy);
 		$numOhlc = count($ohlc);
-		echo "buy signals: $numBuySignals, ohlc: $numOhlc <Br/>";
+		// echo "buy signals: $numBuySignals, ohlc: $numOhlc <Br/>";
 
 		$stopValues = [];
 
@@ -124,7 +124,7 @@
 			foreach ($atr as $curAtr) {
 				if ($curAtr[0] == $entryTS) {
 					$atrDeductible = round($curAtr[1], 3);
-					echo "ATR Deductible: $atrDeductible <Br/>";
+					// echo "ATR Deductible: $atrDeductible <Br/>";
 					break;		
 				}
 			}
@@ -135,7 +135,7 @@
 				if ($curOhlc[0] == $entryTS) {
 					$curStop = round($curOhlc[4] - $riskFactor * $atrDeductible, 3);
 					$targetProfitablePrice = round($curOhlc[4] + $profitFactor * $atrDeductible, 3);
-					echo "Start Stop Loss Value: $curStop, Profitable Target Price: $targetProfitablePrice <Br/>";
+					// echo "Start Stop Loss Value: $curStop, Profitable Target Price: $targetProfitablePrice <Br/>";
 					break;		
 				}
 			}
@@ -220,7 +220,7 @@
 					// Is the current ohlc timestamp = next sma buy timestamp?
 					//	if yes, break
 					elseif ($ohlc[$j][0] >= $nextTS) {
-						echo "Calculate STOP signal for next entry timestamp: $nextTS <Br/>";
+						// echo "Calculate STOP signal for next entry timestamp: $nextTS <Br/>";
 						break;
 					}
 				}
@@ -247,10 +247,18 @@
 		for ($i=0; $i < count($stopValues); $i++) { 
 			//	Compare the Stop Values and the Low for the Day
 			if ($ohlc[$i + $offsetOhlc][3] <= $stopValues[$i][1]) {
-				$sellSignals[$ctrSellSignals][0] = $stopValues[$i][0];
-				$sellSignals[$ctrSellSignals][1] = "sell: cut losses";
+				//Bullish Candlestick, positive value for Close/Current - Open
+				//	and close/current price that is higher than yesterday's close
+				if ( ($ohlc[$i + $offsetOhlc][4] - $ohlc[$i + $offsetOhlc][1]) &&
+					($ohlc[$i + $offsetOhlc][4] >= $ohlc[$i + $offsetOhlc - 1][4]) ) {
+					continue;
+				}
+				else {
+					$sellSignals[$ctrSellSignals][0] = $stopValues[$i][0];
+					$sellSignals[$ctrSellSignals][1] = "sell: cut losses";
 
-				$ctrSellSignals++; 
+					$ctrSellSignals++; 
+				}
 			} 
 			else {
 				try {
@@ -270,5 +278,7 @@
 		}
 
 		echo "ATR Sells: " . json_encode($sellSignals) . "<Br/><Br/>";
+
+		//TODO: Output Signal Generated from SMA and ATR
 	}	
 ?>
