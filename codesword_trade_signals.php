@@ -88,4 +88,187 @@
 		//echo json_encode($filteredSignals);
 		return $filteredSignals;
 	}
+
+	// This function further filters the trade signals from the simple moving average
+	// Inputs:
+	//	- $ohlc -> The Open, High, Low, Close prices
+	//	- $smaBuy -> The Buy Signals from the SMA which will be used as the basis for
+	//			the computation of the stop values
+	//	- $atr -> Average True Range values. Used to calculate the Stop Values at any
+	//			given time of the trade.
+	function codesword_smaEntryATRstopTradeDetector($ohlc, $smaBuy, $atr, $riskFactor = 2, $profitFactor = 4) {
+		// echo "OHLC:" . json_encode($ohlc) . "<Br/><Br/>";
+		echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
+		// echo "ATR:" . json_encode($atr) . "<Br/><Br/>";
+
+		$numBuySignals = count($smaBuy);
+		$numOhlc = count($ohlc);
+		echo "buy signals: $numBuySignals, ohlc: $numOhlc <Br/>";
+
+		$stopValues = [];
+
+		//The sell signals will include information why a sell should be done:
+		//	1. Stop Loss
+		//	2. Take Profits
+		$sellSignals = [];
+		$posOhlc = 0;
+		$posStop = 0;
+
+		for ($i=0; $i < $numBuySignals; $i++) { 
+			$entryTS = $smaBuy[$i][0];
+			$atrDeductible = 0;
+			$curStop = 0;
+			$targetProfitablePrice = 0;
+
+			// Find the ATR value for the entry timestamp
+			foreach ($atr as $curAtr) {
+				if ($curAtr[0] == $entryTS) {
+					$atrDeductible = round($curAtr[1], 3);
+					echo "ATR Deductible: $atrDeductible <Br/>";
+					break;		
+				}
+			}
+
+			// Find the close value for the entry timestamp and compute the
+			//	current stop value
+			foreach ($ohlc as $curOhlc) {
+				if ($curOhlc[0] == $entryTS) {
+					$curStop = round($curOhlc[4] - $riskFactor * $atrDeductible, 3);
+					$targetProfitablePrice = round($curOhlc[4] + $profitFactor * $atrDeductible, 3);
+					echo "Start Stop Loss Value: $curStop, Profitable Target Price: $targetProfitablePrice <Br/>";
+					break;		
+				}
+			}
+
+			// Initial value assignment of stop values based from entry price
+			$stopValues[$posStop][0] = $entryTS;
+			$stopValues[$posStop++][1] = $curStop;
+
+			if ($i == $numBuySignals - 1) {
+				// enter code here where the buy signal timestamp will no longer be
+				//	compared to the "next" buy signal timestamp
+				for ($j = $posOhlc; $j < $numOhlc; $j++) {
+					// Is the current ohlc timestamp > sma buy timestamp?
+					//	if yes, continue with the process
+					if ($ohlc[$j][0] > $entryTS) {
+						$stopValues[$posStop][0] = $ohlc[$j][0];
+
+						//If the current close is higher than 
+						//	the target profitable price (entry + 4 * ATR) then, 
+						//	reduce risk to 1 ATR only (close - 1 * ATR)
+						if ($ohlc[$j][1] > $targetProfitablePrice) {
+							$computeStop = round($ohlc[$j][4] - ($riskFactor * $atrDeductible) / 2, 3);
+							//$stopValues[$posStop][2] = "Take Profits";
+						} 
+						else {
+							$computeStop = round($ohlc[$j][4] - $riskFactor * $atrDeductible, 3);
+						}
+
+						//Compare if computed Stop Value is higher than the curStop
+						if ($computeStop > $curStop) {
+							$stopValues[$posStop][1] = $computeStop;
+							$curStop = $computeStop;
+						} 
+						else {
+							$stopValues[$posStop][1] = $curStop;
+						}
+
+						if ($ohlc[$j][1] > $targetProfitablePrice) {
+							$stopValues[$posStop][2] = "Take Profits";
+						}
+
+						$posOhlc++;
+						$posStop++;
+					}
+				}
+			}
+			else {
+				$nextTS = $smaBuy[$i+1][0];
+
+				for ($j = $posOhlc; $j < $numOhlc; $j++) {
+					// Is the current ohlc timestamp > sma buy timestamp?
+					//	if yes, continue with the process
+					if ( ($ohlc[$j][0] > $entryTS) && ($ohlc[$j][0] < $nextTS) ) {
+						$stopValues[$posStop][0] = $ohlc[$j][0];
+
+						//If the current close is higher than 
+						//	the target profitable price (entry + 4 * ATR) then, 
+						//	reduce risk to 1 ATR only (close - 1 * ATR)
+						if ($ohlc[$j][1] > $targetProfitablePrice) {
+							$computeStop = round($ohlc[$j][4] - ($riskFactor * $atrDeductible) / 2, 3);
+						} 
+						else {
+							$computeStop = round($ohlc[$j][4] - $riskFactor * $atrDeductible, 3);
+						}
+
+						//Compare if computed Stop Value is higher than the curStop
+						if ($computeStop > $curStop) {
+							$stopValues[$posStop][1] = $computeStop;
+							$curStop = $computeStop;
+						} 
+						else {
+							$stopValues[$posStop][1] = $curStop;
+						}
+
+						if ($ohlc[$j][1] > $targetProfitablePrice) {
+							$stopValues[$posStop][2] = "Take Profits";
+						}
+
+						$posOhlc++;
+						$posStop++;
+					}
+					// Is the current ohlc timestamp = next sma buy timestamp?
+					//	if yes, break
+					elseif ($ohlc[$j][0] >= $nextTS) {
+						echo "Calculate STOP signal for next entry timestamp: $nextTS <Br/>";
+						break;
+					}
+				}
+			}
+		}
+
+		echo "<Br/>Stop Values: " . json_encode($stopValues) . "<Br/><Br/>";
+		echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
+
+		//Determine the Sell Signals
+		// Find the offset between stop values and ohlc
+		$offsetOhlc = 0;
+		foreach ($ohlc as $curOhlc) {
+			if ($curOhlc[0] == $stopValues[0][0]) {
+				echo "Offset between OHLC and Stop Values: $offsetOhlc <Br/><Br/>";
+				break;
+			} 
+			else {
+				$offsetOhlc++;
+			}
+		}
+
+		$ctrSellSignals = 0;
+		for ($i=0; $i < count($stopValues); $i++) { 
+			//	Compare the Stop Values and the Low for the Day
+			if ($ohlc[$i + $offsetOhlc][3] <= $stopValues[$i][1]) {
+				$sellSignals[$ctrSellSignals][0] = $stopValues[$i][0];
+				$sellSignals[$ctrSellSignals][1] = "sell: cut losses";
+
+				$ctrSellSignals++; 
+			} 
+			else {
+				try {
+					$tempSellMessage = isset($stopValues[$i][2]) ? $stopValues[$i][2] : null;
+					if ($tempSellMessage != null) {
+						$sellSignals[$ctrSellSignals][0] = $stopValues[$i][0];
+						$sellSignals[$ctrSellSignals][1] = "sell: profit taking";
+
+						$ctrSellSignals++; 
+					}
+				} 
+				catch (Exception $e) {
+					continue;
+				}
+			}
+			
+		}
+
+		echo "ATR Sells: " . json_encode($sellSignals) . "<Br/><Br/>";
+	}	
 ?>

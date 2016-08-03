@@ -1,4 +1,5 @@
 <?php 
+	require_once('codesword_trade_signals.php');
 	require_once('dataSMA.php');
 	require_once('dataTR.php');
 
@@ -43,16 +44,16 @@
 		$sma = codesword_sma($dataOhlcForSMA, $samplePeriod);
 
 		//Get SMA Buy Signals
-		$buySignalsOnly = [];
+		$smaBuy = [];
 		$ctrBuy = 0;
 		$buysellSignals = codesword_smaBuySellSignal($dataOhlcForSMA, $sma);
 		foreach ($buysellSignals as $signal) {
 			if ($signal[1] == "buy") {
-				$buySignalsOnly[$ctrBuy++] = $signal;
+				$smaBuy[$ctrBuy++] = $signal;
 			}
 		}
 
-		// echo json_encode($buySignalsOnly);
+		// echo json_encode($smaBuy);
 
 		//Tailor data for the ATR input
 		$ctr = 0;
@@ -71,16 +72,16 @@
 		// Compute the ATR
 		$atr = codesword_atr($dataOhlcForATR);
 
-		echo json_encode($atr);
+		// echo json_encode($atr);
 
 		// TODO: Get ATR Stop/Sell Signals
 		//		the stop signal is based on the entry price that we'll get from
 		//		the SMA Buy Signal
 		// Inputs:
-		//		1. Data OHLC for ATR 	(ts,high,low,close)
+		//		1. Data OHLC for ATR 	(ts,open,high,low,close)
 		//		2. SMA Buy Signals 		(ts, buy)
 		//		3. ATR Values 			(ts, atr)
-
+		$smaEntryAtrStopSignals = codesword_smaEntryATRstopTradeDetector($dataOhlc, $smaBuy, $atr);
 	}
 
 	// // returns Simple Moving Average Data {(timestamp, sma), (timetsamp, signal)}
