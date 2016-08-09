@@ -81,7 +81,7 @@
 		//		1. Data OHLC for ATR 	(ts,open,high,low,close)
 		//		2. SMA Buy Signals 		(ts, buy)
 		//		3. ATR Values 			(ts, atr)
-		$smaEntryAtrStopSignals = codesword_smaEntryATRstopTradeDetector($dataOhlc, $smaBuy, $atr);
+		$smaEntryAtrStopSignals = codesword_smaEntryATRstopTradeDetector($dataOhlc, $smaBuy, $atr, 2, 4);
 	}
 
 	// // returns Simple Moving Average Data {(timestamp, sma), (timetsamp, signal)}
