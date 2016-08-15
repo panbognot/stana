@@ -58,7 +58,8 @@
 		else {
 			$days = 5;
 		}
-	} else {
+	} 
+	else {
 		if(isset($_GET['days'])) {
 			$days = (int)($_GET['days']);
 		}
@@ -227,7 +228,8 @@
 	$signalsJSON = json_encode($filteredSignals);
 
 	$fileName = "recomm_" . $type . ".json";
-	$file = fopen("output/" . $fileName, "w");
+	$dir = dirname(__FILE__);
+	$file = fopen($dir . "/output/" . $fileName, "w");
 	fwrite($file, $signalsJSON);
 	fclose($file);
 ?>
