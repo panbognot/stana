@@ -96,14 +96,22 @@
 	//			the computation of the stop values
 	//	- $atr -> Average True Range values. Used to calculate the Stop Values at any
 	//			given time of the trade.
-	function codesword_smaEntryATRstopTradeDetector($ohlc, $smaBuy, $atr, $riskFactor = 2, $profitFactor = 4) {
+	function codesword_smaEntryATRstopTradeDetector($ohlc, $smaBuy, $atr, 
+					$riskFactor = 2, $profitFactor = 4, $enProfitComputation = true) {
 		// echo "OHLC:" . json_encode($ohlc) . "<Br/><Br/>";
 		// echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
 		// echo "ATR:" . json_encode($atr) . "<Br/><Br/>";
 
+		$allSignals = [];
 		$numBuySignals = count($smaBuy);
 		$numOhlc = count($ohlc);
-		// echo "buy signals: $numBuySignals, ohlc: $numOhlc <Br/>";
+
+		if ($enProfitComputation) {
+			echo "buy signals: $numBuySignals, ohlc: $numOhlc <Br/>";
+		}
+		else {
+			
+		}
 
 		$stopValues = [];
 
@@ -227,15 +235,21 @@
 			}
 		}
 
-		echo "<Br/>Stop Values: " . json_encode($stopValues) . "<Br/><Br/>";
-		echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
+		$allSignals["buy"] = $smaBuy;
+		if ($enProfitComputation) {
+			echo "<Br/>Stop Values: " . json_encode($stopValues) . "<Br/><Br/>";
+			echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
+		}
 
 		//Determine the Sell Signals
 		// Find the offset between stop values and ohlc
 		$offsetOhlc = 0;
 		foreach ($ohlc as $curOhlc) {
 			if ($curOhlc[0] == $stopValues[0][0]) {
-				echo "Offset between OHLC and Stop Values: $offsetOhlc <Br/><Br/>";
+				if ($enProfitComputation) {
+					echo "Offset between OHLC and Stop Values: $offsetOhlc <Br/><Br/>";
+				}
+
 				break;
 			} 
 			else {
@@ -277,127 +291,136 @@
 			
 		}
 
-		echo "ATR Sells: " . json_encode($sellSignals) . "<Br/><Br/>";
+		$allSignals["sell"] = $sellSignals;
+		if ($enProfitComputation) {
+			echo "ATR Sells: " . json_encode($sellSignals) . "<Br/><Br/>";
+		}
 
-		//Calculate the profit based on the buy and sell signals gathered
-		$startingCapital = 50000;
-		$capital = $startingCapital;
-		$remainingCapital = 0;
-		$ohlcPos = 0;
-		$sellPos = 0;
-		$priceBuy = 0;
-		$volBought = 0;
+		if ($enProfitComputation) {
+			//Calculate the profit based on the buy and sell signals gathered
+			$startingCapital = 100000;
+			$capital = $startingCapital;
+			$remainingCapital = 0;
+			$ohlcPos = 0;
+			$sellPos = 0;
+			$priceBuy = 0;
+			$volBought = 0;
 
-		//Sell match signal
-		$lastTradeAction = null;
+			//Sell match signal
+			$lastTradeAction = null;
 
-		foreach ($smaBuy as $sBuy) {
-			//Date of buy
-			$dateBuy = $sBuy[0];
+			foreach ($smaBuy as $sBuy) {
+				//Date of buy
+				$dateBuy = $sBuy[0];
 
-			//Find the price of Buy Date from OHLC
-			for ($i = $ohlcPos; $i < count($ohlc); $i++) { 
-				if ($ohlc[$i][0] == $dateBuy) {
-					//calculate how much volume you are able to buy
-					$priceBuy = $ohlc[$i][4];
-					$lotSize = 0;
+				//Find the price of Buy Date from OHLC
+				for ($i = $ohlcPos; $i < count($ohlc); $i++) { 
+					if ($ohlc[$i][0] == $dateBuy) {
+						//calculate how much volume you are able to buy
+						$priceBuy = $ohlc[$i][4];
+						$lotSize = 0;
 
-					//calculate lot size depending on price
-					if ($priceBuy < 1) {
-						$lotSize = 10000;
-					} 
-					elseif ($priceBuy < 10) {
-						$lotSize = 1000;
+						//calculate lot size depending on price
+						if ($priceBuy < 1) {
+							$lotSize = 10000;
+						} 
+						elseif ($priceBuy < 10) {
+							$lotSize = 1000;
+						}
+						elseif ($priceBuy < 100) {
+							$lotSize = 100;
+						}
+						elseif ($priceBuy < 1000) {
+							$lotSize = 10;
+						}
+						else {
+							$lotSize = 5;
+						}
+						
+						$priceBuyLot = $lotSize * $priceBuy;
+						// $remainingCapital = $capital % $priceBuyLot;
+						$remainingCapital = fmod($capital, $priceBuyLot);
+						$volBought = ($capital - $remainingCapital) * $lotSize / $priceBuyLot;
+
+						// $volBought = (int)($capital / $priceBuy);
+						// $remainingCapital = $capital - ($priceBuy * $volBought);
+
+						echo "Price Bought: $priceBuy, Volume Bought: $volBought, 
+								Remaining Capital: $remainingCapital, Lot Size: $lotSize <Br/>";
+
+						$ohlcPos = $i;
+						$lastTradeAction = "buy";
+						break;
 					}
-					elseif ($priceBuy < 100) {
-						$lotSize = 100;
-					}
-					elseif ($priceBuy < 1000) {
-						$lotSize = 10;
-					}
-					else {
-						$lotSize = 5;
-					}
-					
-					$priceBuyLot = $lotSize * $priceBuy;
-					// $remainingCapital = $capital % $priceBuyLot;
-					$remainingCapital = fmod($capital, $priceBuyLot);
-					$volBought = ($capital - $remainingCapital) * $lotSize / $priceBuyLot;
-
-					// $volBought = (int)($capital / $priceBuy);
-					// $remainingCapital = $capital - ($priceBuy * $volBought);
-
-					echo "Price Bought: $priceBuy, Volume Bought: $volBought, 
-							Remaining Capital: $remainingCapital, Lot Size: $lotSize <Br/>";
-
-					$ohlcPos = $i;
-					$lastTradeAction = "buy";
-					break;
-				}
-			}
-
-			//run through the sell signals and sell stock on first "cut losses"
-			for ($i = $sellPos; $i < count($sellSignals); $i++) { 
-				if ($lastTradeAction == "sell") {
-					break;
 				}
 
-				//Date of sell
-				$dateSell = $sellSignals[$i][0];
-				$statusSell = $sellSignals[$i][1];
+				//run through the sell signals and sell stock on first "cut losses"
+				for ($i = $sellPos; $i < count($sellSignals); $i++) { 
+					if ($lastTradeAction == "sell") {
+						break;
+					}
 
-				//Sell if date sell is greater than date buy
-				//and if sell status is "cut losses"
-				if ( ($dateSell > $dateBuy) && ($statusSell == "sell: cut losses") ) {
-					//Find the price of Sell Date from OHLC
-					for ($i = $ohlcPos; $i < count($ohlc); $i++) { 
-						if ($ohlc[$i][0] == $dateSell) {
-							//calculate how much volume you are able to buy
-							$priceSell = $ohlc[$i][4];
-							//Calculate Capital gained from selling
-							$sellGains = ($priceSell * $volBought) * (1 - 0.0109);
-							$volBought = 0;
+					//Date of sell
+					$dateSell = $sellSignals[$i][0];
+					$statusSell = $sellSignals[$i][1];
 
-							$capital = $remainingCapital + $sellGains;
-							// $volBought = (int)($capital / $priceBuy);
-							// $remainingCapital = $capital - ($priceBuy * $volBought);
+					//Sell if date sell is greater than date buy
+					//and if sell status is "cut losses"
+					if ( ($dateSell > $dateBuy) && ($statusSell == "sell: cut losses") ) {
+						//Find the price of Sell Date from OHLC
+						for ($i = $ohlcPos; $i < count($ohlc); $i++) { 
+							if ($ohlc[$i][0] == $dateSell) {
+								//calculate how much volume you are able to buy
+								$priceSell = $ohlc[$i][4];
+								//Calculate Capital gained from selling
+								$sellGains = ($priceSell * $volBought) * (1 - 0.0109);
+								$volBought = 0;
 
-							echo "Price Sold: $priceSell, Sell Capital: $sellGains, Total Capital: $capital<Br/>";
+								$capital = $remainingCapital + $sellGains;
+								// $volBought = (int)($capital / $priceBuy);
+								// $remainingCapital = $capital - ($priceBuy * $volBought);
 
-							$ohlcPos = $i;
-							$lastTradeAction = "sell";
-							break;
+								echo "Price Sold: $priceSell, Sell Capital: $sellGains, Total Capital: $capital<Br/>";
+
+								$ohlcPos = $i;
+								$lastTradeAction = "sell";
+								break;
+							}
 						}
 					}
 				}
 			}
+
+			//You've already sold your positions
+			if ($volBought == 0) {
+				$totalEquity = $capital;
+
+				//Percent Gain computation
+				$percGain = (($totalEquity / $startingCapital) - 1) * 100;
+
+				//Remaining Volume you are currently holding
+				echo "<Br/>Total Equity: $totalEquity, Percent Gain: $percGain%<Br/>";
+			} 
+			//You are currently holding some stocks
+			else {
+				//Get current price of stock
+				$curPrice = $ohlc[count($ohlc) - 1][4];
+				//Total Equity
+				$totalEquity = $remainingCapital + ($volBought * $curPrice);
+
+				//Percent Gain computation
+				$percGain = (($totalEquity / $startingCapital) - 1) * 100;
+
+				//Remaining Volume you are currently holding
+				echo "<Br/>Volume Holding: $volBought, Cur Price: $curPrice, 
+					Total Equity: $totalEquity, Percent Gain: $percGain%<Br/>";
+			}
 		}
-
-		//You've already sold your positions
-		if ($volBought == 0) {
-			$totalEquity = $capital;
-
-			//Percent Gain computation
-			$percGain = (($totalEquity / $startingCapital) - 1) * 100;
-
-			//Remaining Volume you are currently holding
-			echo "<Br/>Total Equity: $totalEquity, Percent Gain: $percGain%<Br/>";
-		} 
-		//You are currently holding some stocks
 		else {
-			//Get current price of stock
-			$curPrice = $ohlc[count($ohlc) - 1][4];
-			//Total Equity
-			$totalEquity = $remainingCapital + ($volBought * $curPrice);
+			//TODO: Output Signal Generated from SMA and ATR
+			echo json_encode($allSignals);
 
-			//Percent Gain computation
-			$percGain = (($totalEquity / $startingCapital) - 1) * 100;
-
-			//Remaining Volume you are currently holding
-			echo "<Br/>Volume Holding: $volBought, Cur Price: $curPrice, 
-				Total Equity: $totalEquity, Percent Gain: $percGain%<Br/>";
+			return $allSignals;
 		}
-
-		//TODO: Output Signal Generated from SMA and ATR
 	}	
 ?>

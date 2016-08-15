@@ -203,6 +203,24 @@
 		debug_print("Production of Trade Signals: false<Br/>");	
 	}
 
+	//Enable/disable the profits computation
+	if(isset($_GET['enprofit'])) {
+		$enprofit = $_GET['enprofit'];
+
+		if ($enprofit == "true") {
+			$enprofit = true;
+		}
+		else {
+			$enprofit = false;
+		}
+
+		debug_print("Enable the computation of profits: ".$_GET['enprofit']."<Br/>");	
+	}
+	else {
+		$enprofit = false;
+		debug_print("Enable the computation of profits: false<Br/>");	
+	}
+
 	if(isset($_GET['chart'])) {
 		$chartDataType = $_GET['chart'];
 		debug_print("Date range: from $fromDate to $toDate<Br>");
@@ -263,7 +281,7 @@
 				if(isset($_GET['period'])) {
 					$period = $_GET['period'];
 					getSMAentryATRstop($company, $fromDate, $toDate, $dataorg, $period, $ensig,
-						true,
+						true, $enprofit,
 						$mysql_host, $mysql_database, $mysql_user, $mysql_password);
 				}
 				else {
