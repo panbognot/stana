@@ -21,6 +21,32 @@
 	$fromDate;
 	$dataorg;
 
+	$isCmd = false;
+	$cmdCompany;
+	$cmdChart;
+	$cmdPeriod;
+	$cmdTimerange;
+	$cmdEnProfit;
+
+	//Only Useful for the command line calls
+	if (isset($argv)) {
+		if (count($argv) > 1) {
+			$isCmd = true;
+
+			try {
+				$cmdCompany = isset($argv[1]) ? $argv[1] : "smc";
+				$cmdChart = isset($argv[2]) ? $argv[2] : "smaentryatrstop";
+				$cmdPeriod = isset($argv[3]) ? $argv[3] : 20;
+				$cmdTimerange = isset($argv[4]) ? $argv[4] : "6m";
+				$cmdEnProfit = isset($argv[5]) ? $argv[5] : "false";
+			} 
+			catch (Exception $e) {
+				echo "ERROR: There are missing variables from command line...";
+				return;
+			}
+		}
+	}
+
 	function debug_print($string) {
 		global $debug_mode;
 
@@ -106,9 +132,13 @@
 		}
 	}
 	//select the company you want to view
-	elseif(isset($_GET['company'])) {
-		$company = $_GET['company']."_";
-		debug_print("selected company: ".$_GET['company']."<Br/>");	
+	elseif(isset($_GET['company']) || $isCmd) {
+		$temp = isset($_GET['company']) ? $_GET['company'] : $cmdCompany;
+		$company = $temp . "_";
+		debug_print("selected company: ".$company."<Br/>");	
+
+		//$company = $_GET['company']."_";
+		//debug_print("selected company: ".$_GET['company']."<Br/>");	
 	}
 	elseif (isset($_GET['keyword'])) {
 		$keyword = $_GET['keyword'];
@@ -154,8 +184,9 @@
 	}
 
 	//select the time range of the company
-	if (isset($_GET['timerange'])) {
-		$tempTime = $_GET['timerange'];
+	if (isset($_GET['timerange']) || $isCmd) {
+		$tempTime = isset($_GET['timerange']) ? $_GET['timerange'] : $cmdTimerange;
+		//$tempTime = $_GET['timerange'];
 
 		getTimeRange($tempTime);
 	}
@@ -204,25 +235,28 @@
 	}
 
 	//Enable/disable the profits computation
-	if(isset($_GET['enprofit'])) {
-		$enprofit = $_GET['enprofit'];
+	if(isset($_GET['enprofit']) || $isCmd) {
+		$tempEnprofit = isset($_GET['enprofit']) ? $_GET['enprofit'] : $cmdEnProfit;
+		//$enprofit = $_GET['enprofit'];
 
-		if ($enprofit == "true") {
+		if ($tempEnprofit == "true") {
 			$enprofit = true;
 		}
 		else {
 			$enprofit = false;
 		}
 
-		debug_print("Enable the computation of profits: ".$_GET['enprofit']."<Br/>");	
+		debug_print("Enable the computation of profits: $tempEnprofit<Br/>");	
 	}
 	else {
 		$enprofit = false;
 		debug_print("Enable the computation of profits: false<Br/>");	
 	}
 
-	if(isset($_GET['chart'])) {
-		$chartDataType = $_GET['chart'];
+	if(isset($_GET['chart']) || $isCmd) {
+		$chartDataType = isset($_GET['chart']) ? $_GET['chart'] : $cmdChart;
+
+		//$chartDataType = $_GET['chart'];
 		debug_print("Date range: from $fromDate to $toDate<Br>");
 
 		switch ($chartDataType) {
@@ -278,8 +312,10 @@
 				}
 				break;
 			case 'smaentryatrstop':
-				if(isset($_GET['period'])) {
-					$period = $_GET['period'];
+				if(isset($_GET['period']) || $isCmd) {
+					$period = isset($_GET['period']) ? $_GET['period'] : $cmdPeriod; 
+
+					// $period = $_GET['period'];
 					getSMAentryATRstop($company, $fromDate, $toDate, $dataorg, $period, $ensig,
 						true, $enprofit,
 						$mysql_host, $mysql_database, $mysql_user, $mysql_password);
