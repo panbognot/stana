@@ -426,6 +426,107 @@
 	    return (date('N', strtotime($date)) >= 6);
 	}
 
+	// return the OHLCAVV for a single date of one company
+	function getSingleOHLCAVV ($company, $targetDate=null, $dataorg="json", $host, $db, $user, $pass) {
+		$ohlcur = [];	//ohl-current candlestick
+		$accessOHLCur = false;	//don't read the ohlcurrent by default
+
+		if ($targetDate == null) {
+			$targetDate = date("Y-m-d");
+		}
+
+		// Create connection
+		$con=mysqli_connect($host, $user, $pass, $db);
+		
+		// Check connection
+		if (mysqli_connect_errno()) {
+		  echo "Failed to connect to MySQL: " . mysqli_connect_error();
+		  return;
+		}
+
+		if ( ($dataorg == "highchart") || ($dataorg == "array2") ) {
+			//Added 8 hours to timestamp because of the Philippine Timezone WRT GMT (+8:00)
+			$sql = "SELECT (UNIX_TIMESTAMP(DATE_ADD(timestamp, INTERVAL 8 HOUR)) * 1000) as timestamp, 
+					open, high, low, close, average, volume, value 
+					FROM $company 
+					WHERE timestamp = '".$targetDate."'";
+		}
+		else {
+			$sql = "SELECT DATE_FORMAT(timestamp, '%Y-%m-%d') as timestamp, 
+					open, high, low, close, average, volume, value 
+					FROM $company 
+					WHERE timestamp = '".$targetDate."'";
+		}
+
+		//echo "sql: $sql<Br/>";
+		$result = mysqli_query($con, $sql);
+
+		$dbreturn = "";
+		$ctr = 0;
+		$temp;
+		while($row = mysqli_fetch_array($result)) {
+			if ($dataorg == "json") {
+				$dbreturn[$ctr]['timestamp'] = $row['timestamp'];
+				$dbreturn[$ctr]['open'] = $row['open'];
+				$dbreturn[$ctr]['high'] = $row['high'];
+				$dbreturn[$ctr]['low'] = $row['low'];
+				$dbreturn[$ctr]['close'] = $row['close'];
+				$dbreturn[$ctr]['average'] = $row['average'];
+				$dbreturn[$ctr]['volume'] = $row['volume'];
+				$dbreturn[$ctr]['value'] = $row['value'];
+			} 
+			elseif ($dataorg == "highchart") {
+				$dbreturn[$ctr][0] = doubleval($row['timestamp']);
+				$dbreturn[$ctr][1] = floatval($row['open']);
+				$dbreturn[$ctr][2] = floatval($row['high']);
+				$dbreturn[$ctr][3] = floatval($row['low']);
+				$dbreturn[$ctr][4] = floatval($row['close']);
+				$dbreturn[$ctr][5] = intval($row['average']);
+				$dbreturn[$ctr][6] = intval($row['volume']);
+				$dbreturn[$ctr][7] = intval($row['value']);
+			}
+			elseif ($dataorg == "array") {
+				$dbreturn[$ctr][0] = $row['timestamp'];
+				$dbreturn[$ctr][1] = floatval($row['open']);
+				$dbreturn[$ctr][2] = floatval($row['high']);
+				$dbreturn[$ctr][3] = floatval($row['low']);
+				$dbreturn[$ctr][4] = floatval($row['close']);
+				$dbreturn[$ctr][5] = intval($row['average']);
+				$dbreturn[$ctr][6] = intval($row['volume']);
+				$dbreturn[$ctr][7] = intval($row['value']);
+			}
+			elseif ($dataorg == "array2") {
+				$dbreturn[$ctr][0] = doubleval($row['timestamp']);
+				$dbreturn[$ctr][1] = floatval($row['open']);
+				$dbreturn[$ctr][2] = floatval($row['high']);
+				$dbreturn[$ctr][3] = floatval($row['low']);
+				$dbreturn[$ctr][4] = floatval($row['close']);
+				$dbreturn[$ctr][5] = intval($row['average']);
+				$dbreturn[$ctr][6] = intval($row['volume']);
+				$dbreturn[$ctr][7] = intval($row['value']);
+			}
+			else {
+				$dbreturn[$ctr]['timestamp'] = $row['timestamp'];
+				$dbreturn[$ctr]['open'] = $row['open'];
+				$dbreturn[$ctr]['high'] = $row['high'];
+				$dbreturn[$ctr]['low'] = $row['low'];
+				$dbreturn[$ctr]['close'] = $row['close'];
+				$dbreturn[$ctr]['average'] = $row['average'];
+				$dbreturn[$ctr]['volume'] = $row['volume'];
+				$dbreturn[$ctr]['value'] = $row['value'];
+			}
+
+			$ctr = $ctr + 1;
+		}
+
+		if ($ctr == 0) {
+			echo json_encode([]);
+			return;
+		} 
+
+		echo json_encode( $dbreturn );
+	}
+
 	// returns OHLC for a candlestick chart
 	function getOHLC ($company, $from="1900-01-01 00:00:00", $to=null, $dataorg="json", $host, $db, $user, $pass) {
 		$ohlcur = [];	//ohl-current candlestick
