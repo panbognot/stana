@@ -98,9 +98,9 @@
 	//			given time of the trade.
 	function codesword_smaEntryATRstopTradeDetector($company, $ohlc, $smaBuy, $atr, 
 					$riskFactor = 2, $profitFactor = 4, $enProfitComputation = true) {
-		echo "OHLC:" . json_encode($ohlc) . "<Br/><Br/>";
-		echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
-		echo "ATR:" . json_encode($atr) . "<Br/><Br/>";
+		// echo "OHLC:" . json_encode($ohlc) . "<Br/><Br/>";
+		// echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
+		// echo "ATR:" . json_encode($atr) . "<Br/><Br/>";
 
 		$allSignals = [];
 		$numBuySignals = count($smaBuy);
