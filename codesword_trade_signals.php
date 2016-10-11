@@ -96,11 +96,12 @@
 	//			the computation of the stop values
 	//	- $atr -> Average True Range values. Used to calculate the Stop Values at any
 	//			given time of the trade.
-	function codesword_smaEntryATRstopTradeDetector($ohlc, $smaBuy, $atr, 
+	function codesword_smaEntryATRstopTradeDetector($company, $ohlc, $smaBuy, $atr, 
 					$riskFactor = 2, $profitFactor = 4, $enProfitComputation = true) {
 		// echo "OHLC:" . json_encode($ohlc) . "<Br/><Br/>";
 		// echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
 		// echo "ATR:" . json_encode($atr) . "<Br/><Br/>";
+		$company = str_replace("_", "", $company);
 
 		$allSignals = [];
 		$numBuySignals = count($smaBuy);
@@ -235,11 +236,12 @@
 			}
 		}
 
-		$allSignals["buy"] = $smaBuy;
 		if ($enProfitComputation) {
 			echo "<Br/>Stop Values: " . json_encode($stopValues) . "<Br/><Br/>";
 			echo "SMA Buy:" . json_encode($smaBuy) . "<Br/><Br/>";
 		}
+
+		//$allSignals["buy"] = $smaBuy;
 
 		//Determine the Sell Signals
 		// Find the offset between stop values and ohlc
@@ -291,10 +293,11 @@
 			
 		}
 
-		$allSignals["sell"] = $sellSignals;
 		if ($enProfitComputation) {
 			echo "ATR Sells: " . json_encode($sellSignals) . "<Br/><Br/>";
 		}
+
+		//$allSignals["sell"] = $sellSignals;
 
 		if ($enProfitComputation) {
 			//Calculate the profit based on the buy and sell signals gathered
@@ -417,6 +420,21 @@
 			}
 		}
 		else {
+			$allBuys = [];
+			for ($i=0; $i < count($smaBuy); $i++) { 
+				$allBuys[$i]["date"] = $smaBuy[$i][0];
+				$allBuys[$i]["company"] = $company;
+			}
+			$allSignals["buy"] = $allBuys;
+
+			$allSells = [];
+			for ($i=0; $i < count($sellSignals); $i++) { 
+				$allSells[$i]["date"] = $sellSignals[$i][0];
+				$allSells[$i]["company"] = $company;
+				$allSells[$i]["signal"] = $sellSignals[$i][1];
+			}
+			$allSignals["sell"] = $allSells;
+
 			//TODO: Output Signal Generated from SMA and ATR
 			echo json_encode($allSignals);
 
